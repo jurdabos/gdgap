@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "gdgap"
 version = "0.1.0"
@@ -7,6 +11,7 @@ requires-python = ">=3.13"
 dependencies = [
     "acidbase",
     "click>=8.4.2",
+    "duckdb>=1.5.4",
 ]
 
 [tool.uv.sources]
@@ -58,5 +63,6 @@ line-ending = "lf"
 
 [dependency-groups]
 dev = [
+    "pytest>=9.1.1",
     "ruff>=0.15.22",
 ]
