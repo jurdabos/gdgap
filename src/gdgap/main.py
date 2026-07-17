@@ -1,1 +1,2 @@
-def main(): print('hello, gdgap')
+def main():
+    print("hello, gdgap")

@@ -4,6 +4,7 @@ Reusable push CLI — auto-detects project name from pyproject.toml.
 Provides the ``push`` subcommand that automates the git commit-and-push
 workflow, including pre-commit hook retry logic and optional DVC integration.
 """
+
 import shutil
 import subprocess
 import tomllib
@@ -17,27 +18,94 @@ DEFAULT_SIZE_THRESHOLD = 1_048_576  # 1 MB
 # Extensions always routed through DVC regardless of size
 DVC_EXTENSIONS: set[str] = {
     # Images
-    ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".webp",
-    ".heic", ".heif", ".svg", ".ico", ".raw", ".cr2", ".nef", ".arw",
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".gif",
+    ".bmp",
+    ".tiff",
+    ".tif",
+    ".webp",
+    ".heic",
+    ".heif",
+    ".svg",
+    ".ico",
+    ".raw",
+    ".cr2",
+    ".nef",
+    ".arw",
     # Video
-    ".mp4", ".mov", ".avi", ".mkv", ".webm", ".ts", ".flv", ".wmv",
+    ".mp4",
+    ".mov",
+    ".avi",
+    ".mkv",
+    ".webm",
+    ".ts",
+    ".flv",
+    ".wmv",
     # Audio
-    ".mp3", ".wav", ".m4a", ".ogg", ".flac", ".aac", ".wma",
+    ".mp3",
+    ".wav",
+    ".m4a",
+    ".ogg",
+    ".flac",
+    ".aac",
+    ".wma",
     # ML artefacts
-    ".h5", ".hdf5", ".pkl", ".pickle", ".pt", ".pth", ".onnx",
-    ".safetensors", ".bin", ".npy", ".npz",
+    ".h5",
+    ".hdf5",
+    ".pkl",
+    ".pickle",
+    ".pt",
+    ".pth",
+    ".onnx",
+    ".safetensors",
+    ".bin",
+    ".npy",
+    ".npz",
     # Archives & data
-    ".zip", ".tar", ".gz", ".bz2", ".7z", ".rar",
-    ".csv", ".parquet", ".feather", ".arrow",
-    ".db", ".sqlite", ".sqlite3",
+    ".zip",
+    ".tar",
+    ".gz",
+    ".bz2",
+    ".7z",
+    ".rar",
+    ".csv",
+    ".parquet",
+    ".feather",
+    ".arrow",
+    ".db",
+    ".sqlite",
+    ".sqlite3",
 }
 
 # Extensions that are clearly source/config and should stay in git only
 _CODE_EXTENSIONS: set[str] = {
-    ".py", ".pyi", ".md", ".rst", ".txt", ".toml", ".yaml", ".yml",
-    ".json", ".cfg", ".ini", ".sh", ".ps1", ".bat", ".cmd",
-    ".html", ".css", ".js", ".ts", ".jsx", ".tsx",
-    ".lock", ".gitignore", ".gitattributes", ".dvcignore",
+    ".py",
+    ".pyi",
+    ".md",
+    ".rst",
+    ".txt",
+    ".toml",
+    ".yaml",
+    ".yml",
+    ".json",
+    ".cfg",
+    ".ini",
+    ".sh",
+    ".ps1",
+    ".bat",
+    ".cmd",
+    ".html",
+    ".css",
+    ".js",
+    ".ts",
+    ".jsx",
+    ".tsx",
+    ".lock",
+    ".gitignore",
+    ".gitattributes",
+    ".dvcignore",
 }
 
 
