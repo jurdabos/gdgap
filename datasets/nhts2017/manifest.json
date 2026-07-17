@@ -1,0 +1,36 @@
+{
+  "dataset": "nhts2017",
+  "source_url": "https://nhts.ornl.gov/media/2016/download/csv.zip",
+  "retrieved": "2026-07",
+  "license_note": "US DOT public dataset; not redistributed in this repo",
+  "files": [
+    {"name": "hhpub.csv", "sha256": "a8e461d45e3abefd6ed1620daba947f664752ed4bbbee8413ce49d7bc80d762c", "bytes": 38631137}
+  ]
+}
+{
+  "dataset": "nhts2017",
+  "source_url": "https://nhts.ornl.gov/media/2016/download/csv.zip",
+  "retrieved": "2026-07",
+  "license_note": "US DOT public dataset; not redistributed in this repo",
+  "files": [
+    {"name": "perpub.csv", "sha256": "e75e9e1f0ff1438e37a8227e0c166b6db9ef8444cff5db1fa79085e36d0609cc", "bytes": 153098853}
+  ]
+}
+{
+  "dataset": "nhts2017",
+  "source_url": "https://nhts.ornl.gov/media/2016/download/csv.zip",
+  "retrieved": "2026-07",
+  "license_note": "US DOT public dataset; not redistributed in this repo",
+  "files": [
+    {"name": "trippub.csv", "sha256": "17449ee491a9acc64db65aa2336e38e1a228cba200b6baacae0448fe4e9e2e36", "bytes": 546388721}
+  ]
+}
+{
+  "dataset": "nhts2017",
+  "source_url": "https://nhts.ornl.gov/media/2016/download/csv.zip",
+  "retrieved": "2026-07",
+  "license_note": "US DOT public dataset; not redistributed in this repo",
+  "files": [
+    {"name": "vehpub.csv", "sha256": "d92a4415270647e35cfe7bb5a0ed4c160ef828fe759bf7e8bb16d3b9e0d71d3a", "bytes": 90856500}
+  ]
+}

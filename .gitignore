@@ -127,3 +127,5 @@ catalog/
 
 # Repo-plane exceptions to the global data ignores
 !sql/**/*.sql
+# Dataset metadata (datasheets, manifests, checksums) is repo-plane; bulk files stay out via extension rules
+!datasets/
