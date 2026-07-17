@@ -20,4 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `src/gdgap/cli.py`: `gdgap push` now detects commits that exist locally but not on the upstream (`git rev-list --count @{u}..HEAD`) and pushes them even when the working tree is clean; previously an aborted push left the commit stranded and re-running reported "Nothing to push". Same fix applied to the skeletal template (`~/skeletal/scripts/cli_push_template.py`) for future repos.
+- `src/gdgap/cli.py`: commit messages no longer get a hardcoded `Co-Authored-By: Warp <agent@warp.dev>` trailer, in line with the ecosystem signing policy (responsibility stays with the human author); also removed from the skeletal template.
 - `pyproject.toml`: added the missing `[build-system]` table (hatchling) so uv packages the project and installs the `gdgap` console script. Modern `uv init` scaffolds an unpackaged app, so uv skipped `[project.scripts]` entry-point installation and `uv run gdgap --help` failed with "Failed to spawn".

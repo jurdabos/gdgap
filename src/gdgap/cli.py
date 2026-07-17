@@ -151,6 +151,13 @@ def _has_changes(root: Path) -> bool:
     return bool(result.stdout.strip())
 
 
+def _count_unpushed(root: Path) -> int:
+    """Counts commits on HEAD that are missing from the upstream branch."""
+    result = _run(["git", "rev-list", "--count", "@{u}..HEAD"], cwd=root, check=False)
+    out = result.stdout.strip()
+    return int(out) if result.returncode == 0 and out.isdigit() else 0
+
+
 def _hooks_modified_files(output: str) -> bool:
     """Checks whether pre-commit hooks modified files (retryable failure)."""
     return "files were modified by this hook" in output.lower()
@@ -279,54 +286,58 @@ def push(message: str | None, dry_run: bool, size_threshold: int) -> None:
     # Summarising all git changes
     status_result = _run(["git", "status", "--porcelain"], cwd=root, check=False)
     status_lines = [ln for ln in status_result.stdout.strip().splitlines() if ln.strip()]
-    if not status_lines:
+    unpushed = _count_unpushed(root)
+    if not status_lines and unpushed == 0:
         click.echo(click.style("\n✓ Nothing to push — working tree is clean.", fg="green"))
         return
-    click.echo(click.style(f"\n③ {len(status_lines)} git change(s) detected:", bold=True))
-    for ln in status_lines:
-        click.echo(f"   {ln}")
+    if status_lines:
+        click.echo(click.style(f"\n③ {len(status_lines)} git change(s) detected:", bold=True))
+        for ln in status_lines:
+            click.echo(f"   {ln}")
+    else:
+        click.echo(click.style(f"\n③ Working tree clean, but {unpushed} unpushed commit(s) detected.", bold=True))
     if dry_run:
         click.echo(click.style("\n── dry run ── no changes made", fg="yellow"))
         return
-    # Staging all changes
-    click.echo(click.style("\n④ Staging all changes ...", bold=True))
-    _run(["git", "add", "."], cwd=root)
-    staged = _run(["git", "diff", "--cached", "--name-only"], cwd=root, check=False)
-    if not staged.stdout.strip():
-        click.echo(click.style("   ⚠ Nothing staged after git add — skipping commit.", fg="yellow"))
-    else:
-        staged_count = len(staged.stdout.strip().splitlines())
-        click.echo(f"   {staged_count} file(s) staged")
-        # Committing with pre-commit hook retry
-        commit_msg = message or _auto_commit_message(all_dvc_files)
-        full_msg = f"{commit_msg}\n\nCo-Authored-By: Warp <agent@warp.dev>"
-        click.echo(click.style("\n⑤ Committing ...", bold=True))
-        max_attempts = 3
-        committed = False
-        for attempt in range(1, max_attempts + 1):
-            try:
-                _run(["git", "commit", "-m", full_msg], cwd=root)
-                label = f" (attempt {attempt})" if attempt > 1 else ""
-                click.echo(f"   ✓ Committed{label}")
-                committed = True
-                break
-            except subprocess.CalledProcessError as exc:
-                combined = exc.stdout + exc.stderr
-                if _hooks_modified_files(combined) and attempt < max_attempts:
-                    click.echo(f"   ⟳ Pre-commit hooks modified files (attempt {attempt}) — re-staging ...")
-                    _run(["git", "add", "."], cwd=root)
-                    continue
-                click.echo(
-                    click.style(f"   ✗ Commit failed (attempt {attempt}): {exc.stderr.strip()}", fg="red"),
-                    err=True,
-                )
-                raise SystemExit(1)
-        # Handling post-commit hooks that leave dirty state
-        if committed and _has_changes(root):
-            click.echo("   ⟳ Post-commit hook left changes — amending ...")
-            _run(["git", "add", "."], cwd=root)
-            _run(["git", "commit", "--amend", "--no-edit", "--no-verify"], cwd=root, check=False)
-            click.echo("   ✓ Amended")
+    if status_lines:
+        # Staging all changes
+        click.echo(click.style("\n④ Staging all changes ...", bold=True))
+        _run(["git", "add", "."], cwd=root)
+        staged = _run(["git", "diff", "--cached", "--name-only"], cwd=root, check=False)
+        if not staged.stdout.strip():
+            click.echo(click.style("   ⚠ Nothing staged after git add — skipping commit.", fg="yellow"))
+        else:
+            staged_count = len(staged.stdout.strip().splitlines())
+            click.echo(f"   {staged_count} file(s) staged")
+            # Committing with pre-commit hook retry
+            commit_msg = message or _auto_commit_message(all_dvc_files)
+            click.echo(click.style("\n⑤ Committing ...", bold=True))
+            max_attempts = 3
+            committed = False
+            for attempt in range(1, max_attempts + 1):
+                try:
+                    _run(["git", "commit", "-m", commit_msg], cwd=root)
+                    label = f" (attempt {attempt})" if attempt > 1 else ""
+                    click.echo(f"   ✓ Committed{label}")
+                    committed = True
+                    break
+                except subprocess.CalledProcessError as exc:
+                    combined = exc.stdout + exc.stderr
+                    if _hooks_modified_files(combined) and attempt < max_attempts:
+                        click.echo(f"   ⟳ Pre-commit hooks modified files (attempt {attempt}) — re-staging ...")
+                        _run(["git", "add", "."], cwd=root)
+                        continue
+                    click.echo(
+                        click.style(f"   ✗ Commit failed (attempt {attempt}): {exc.stderr.strip()}", fg="red"),
+                        err=True,
+                    )
+                    raise SystemExit(1)
+            # Handling post-commit hooks that leave dirty state
+            if committed and _has_changes(root):
+                click.echo("   ⟳ Post-commit hook left changes — amending ...")
+                _run(["git", "add", "."], cwd=root)
+                _run(["git", "commit", "--amend", "--no-edit", "--no-verify"], cwd=root, check=False)
+                click.echo("   ✓ Amended")
     # DVC push (only when DVC is configured)
     if use_dvc:
         click.echo(click.style("\n⑥ DVC push ...", bold=True))
