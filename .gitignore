@@ -124,3 +124,6 @@ data/
 catalog/
 *.ducklake
 *.ducklake.wal
+
+# Repo-plane exceptions to the global data ignores
+!sql/**/*.sql

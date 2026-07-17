@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `.gitkeep` placeholders in `sql/ddl/blind`, `sql/ddl/aware`, `results/profile`, `results/plans`, `docs/adr`, and `tests` so the empty repo-plane directory skeleton is committable (git tracks files only, never bare directories).
+
+### Changed
+
+- `.gitignore`: re-included `sql/**/*.sql` via a negation rule so DDL scripts are committable despite the global `*.sql` ignore inherited from the skeletal template; data-plane dirs (`data/`, `catalog/`, `datasets/`) stay ignored.
+
 ### Fixed
 
 - `pyproject.toml`: added the missing `[build-system]` table (hatchling) so uv packages the project and installs the `gdgap` console script. Modern `uv init` scaffolds an unpackaged app, so uv skipped `[project.scripts]` entry-point installation and `uv run gdgap --help` failed with "Failed to spawn".
