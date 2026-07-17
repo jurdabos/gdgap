@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `docs/adr/0001-engine-and-lake.md`: ADR recording the engine pin — DuckDB v1.5.4 at runtime, `duckdb==1.5.4` locked in `uv.lock` — plus the lake/catalog layout and the upgrade procedure.
 - `.gitkeep` placeholders in `sql/ddl/blind`, `sql/ddl/aware`, `results/profile`, `results/plans`, `docs/adr`, and `tests` so the empty repo-plane directory skeleton is committable (git tracks files only, never bare directories).
 
 ### Changed
