@@ -4,8 +4,12 @@ Manifest-verified, idempotent ingest of the 2017 NHTS CSVs into the DuckLake.
 Implements the Phase C contract: verifies each raw CSV's SHA-256 against
 datasets/nhts2017/manifest.json before reading, creates one lake table per file
 (each CREATE TABLE is a DuckLake snapshot; lake.snapshots() is the audit trail),
-records row counts into results/profile/ingest_log.csv, and emits the W1
+records row counts into results/profile/nhts2017/ingest_log.csv, and emits the W1
 profiling CSVs (structure, null shares, sex code list, imputation share).
+
+Multi-dataset invariant (ADR-0002): every table lives in a lake schema named after
+its dataset (lake.nhts2017.<table>) and every profile artefact lands under
+results/profile/<dataset>/, so a second dataset can never collide with this one.
 """
 
 import csv
@@ -24,7 +28,7 @@ TABLES = ("hhpub", "perpub", "trippub", "vehpub")
 RAW_DIR = Path("data/raw/nhts2017")
 MANIFEST_PATH = Path("datasets/nhts2017/manifest.json")
 ATTACH_SQL = Path("sql/00_attach.sql")
-PROFILE_DIR = Path("results/profile")
+PROFILE_DIR = Path("results/profile") / DATASET
 INGEST_LOG = PROFILE_DIR / "ingest_log.csv"
 # Sex variable and its imputed companion, spelled exactly as in the FHWA codebook. R_SEX holds the reported
 # code (01/02, with -7/-8 reserve codes); R_SEX_IMP holds the same value with imputations filled in, so a row
@@ -99,11 +103,16 @@ def _connect(root: Path) -> duckdb.DuckDBPyConnection:
     return con
 
 
+def _qualified(table: str) -> str:
+    """Returns the fully qualified lake table name in this dataset's schema."""
+    return f"lake.{DATASET}.{table}"
+
+
 def _table_exists(con: duckdb.DuckDBPyConnection, table: str) -> bool:
-    """Checks whether a table exists in the attached lake catalog."""
+    """Checks whether a table exists in this dataset's schema of the lake catalog."""
     row = con.execute(
-        "select count(*) from duckdb_tables() where database_name = 'lake' and table_name = ?",
-        [table],
+        "select count(*) from duckdb_tables() where database_name = 'lake' and schema_name = ? and table_name = ?",
+        [DATASET, table],
     ).fetchone()
     return bool(row and row[0])
 
@@ -134,6 +143,8 @@ def ingest(root: Path | None = None, force: bool = False) -> list[dict]:
     ts_utc = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
     log_rows: list[dict] = []
     with _chdir(root), closing(_connect(root)) as con:
+        # Keeping one lake schema per dataset so table names can never collide across datasets
+        con.execute(f"create schema if not exists lake.{DATASET}")
         for table in TABLES:
             csv_name = f"{table}.csv"
             exists = _table_exists(con, table)
@@ -142,13 +153,13 @@ def ingest(root: Path | None = None, force: bool = False) -> list[dict]:
             else:
                 action = "recreated" if exists else "created"
                 if exists:
-                    con.execute(f"drop table lake.{table}")
+                    con.execute(f"drop table {_qualified(table)}")
                 con.execute(
-                    f"create table lake.{table} as "
+                    f"create table {_qualified(table)} as "
                     f"select * from read_csv('{(RAW_DIR / csv_name).as_posix()}', header = true, sample_size = -1)"
                 )
-            n = con.execute(f"select count(*) from lake.{table}").fetchone()[0]
-            click.echo(f"  lake.{table}: {action}, {n} rows")
+            n = con.execute(f"select count(*) from {_qualified(table)}").fetchone()[0]
+            click.echo(f"  {_qualified(table)}: {action}, {n} rows")
             log_rows.append(
                 {
                     "ts_utc": ts_utc,
@@ -179,21 +190,21 @@ def profile(root: Path | None = None) -> list[Path]:
         PROFILE_DIR.mkdir(parents=True, exist_ok=True)
         for table in TABLES:
             structure = PROFILE_DIR / f"{table}_structure.csv"
-            con.execute(f"copy (select * from (describe lake.{table})) to '{structure.as_posix()}'")
+            con.execute(f"copy (select * from (describe {_qualified(table)})) to '{structure.as_posix()}'")
             written.append(structure)
             # Null shares per column, the COLUMNS(*) idiom: one wide row of count(*) - count(col)
             nulls = PROFILE_DIR / f"{table}_nulls.csv"
-            con.execute(f"copy (select count(*) - count(COLUMNS(*)) from lake.{table}) to '{nulls.as_posix()}'")
+            con.execute(f"copy (select count(*) - count(COLUMNS(*)) from {_qualified(table)}) to '{nulls.as_posix()}'")
             written.append(nulls)
         codelist = PROFILE_DIR / "perpub_sex_codelist.csv"
         con.execute(
             f"""
             copy (
                 select '{SEX_COL}' as variable, {SEX_COL} as value, count(*) as n
-                from lake.perpub group by 2
+                from {_qualified("perpub")} group by 2
                 union all
                 select '{SEX_IMP_COL}' as variable, {SEX_IMP_COL} as value, count(*) as n
-                from lake.perpub group by 2
+                from {_qualified("perpub")} group by 2
                 order by variable, value
             ) to '{codelist.as_posix()}'
             """
@@ -208,7 +219,7 @@ def profile(root: Path | None = None) -> list[Path]:
                     count(*) as rows_total,
                     count(*) filter (where {SEX_COL} <> {SEX_IMP_COL}) as rows_imputed,
                     round(100.0 * count(*) filter (where {SEX_COL} <> {SEX_IMP_COL}) / count(*), 4) as imputed_pct
-                from lake.perpub
+                from {_qualified("perpub")}
             ) to '{share.as_posix()}'
             """
         )
