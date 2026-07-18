@@ -129,3 +129,5 @@ catalog/
 !sql/**/*.sql
 # Dataset metadata (datasheets, manifests, checksums) is repo-plane; bulk files stay out via extension rules
 !datasets/
+# Results are ch. 4 evidence (profiles, plans, storage metrics) and stay tracked despite the global *.csv ignore
+!results/**/*.csv

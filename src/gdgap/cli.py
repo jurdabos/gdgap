@@ -358,6 +358,28 @@ def push(message: str | None, dry_run: bool, size_threshold: int) -> None:
     click.echo(click.style("\n✓ All done — changes committed & pushed.", fg="green", bold=True))
 
 
+@cli.command("ingest")
+@click.argument("dataset", default="nhts2017", required=False)
+@click.option("--force", is_flag=True, help="Drop and recreate existing lake tables")
+def ingest_cmd(dataset: str, force: bool) -> None:
+    """Ingests a registered dataset into the DuckLake (manifest-verified, idempotent)."""
+    # Importing lazily so push invocations skip the duckdb import
+    from gdgap.ingest import nhts2017
+
+    if dataset != nhts2017.DATASET:
+        raise click.BadParameter(f"unknown dataset '{dataset}'; registered: {nhts2017.DATASET}")
+    nhts2017.ingest(force=force)
+
+
+@cli.command("profile")
+def profile_cmd() -> None:
+    """Emits the W1 profiling CSVs into results/profile/."""
+    # Importing lazily so push invocations skip the duckdb import
+    from gdgap.ingest import nhts2017
+
+    nhts2017.profile()
+
+
 def main() -> None:
     """Entry point for the CLI."""
     cli()
