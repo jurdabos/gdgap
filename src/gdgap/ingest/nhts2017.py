@@ -16,12 +16,14 @@ import csv
 import hashlib
 import json
 import os
+from collections import Counter
 from contextlib import closing, contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 
 import click
 import duckdb
+from tabulate import tabulate
 
 DATASET = "nhts2017"
 TABLES = ("hhpub", "perpub", "trippub", "vehpub")
@@ -35,6 +37,15 @@ INGEST_LOG = PROFILE_DIR / "ingest_log.csv"
 # was imputed exactly when the two differ. Both arrive as zero-padded VARCHAR codes and stay that way raw.
 SEX_COL = "R_SEX"
 SEX_IMP_COL = "R_SEX_IMP"
+# Code labels per the FHWA codebook, for the human-readable summary only; raw codes stay untouched
+SEX_CODE_LABELS = {
+    "-9": "Not ascertained",
+    "-8": "I don't know",
+    "-7": "I prefer not to answer",
+    "01": "Male",
+    "02": "Female",
+}
+SUMMARY_FILE = "profile_summary.md"
 
 
 def find_root() -> Path:
@@ -227,3 +238,123 @@ def profile(root: Path | None = None) -> list[Path]:
     for path in written:
         click.echo(f"  wrote {path.as_posix()}")
     return written
+
+
+def _read_csv_rows(path: Path) -> list[dict]:
+    """Returns all rows of a CSV file as dictionaries."""
+    with open(path, newline="", encoding="utf-8") as handle:
+        return list(csv.DictReader(handle))
+
+
+def _latest_row_counts(profile_dir: Path) -> dict[str, int]:
+    """Returns the most recent ingest row count per table from ingest_log.csv."""
+    counts: dict[str, int] = {}
+    for row in _read_csv_rows(profile_dir / "ingest_log.csv"):
+        counts[row["table"]] = int(row["rows"])
+    return counts
+
+
+def _structure_summary(profile_dir: Path, table: str) -> tuple[int, str]:
+    """Returns the column count and a compact type breakdown from a table's structure CSV."""
+    rows = _read_csv_rows(profile_dir / f"{table}_structure.csv")
+    type_counts = Counter(row["column_type"] for row in rows)
+    breakdown = " · ".join(f"{n} {t}" for t, n in sorted(type_counts.items(), key=lambda item: -item[1]))
+    return len(rows), breakdown
+
+
+def _null_summary(profile_dir: Path, table: str) -> tuple[int, int]:
+    """Returns the count of null-carrying columns and total null cells from a table's nulls CSV."""
+    with open(profile_dir / f"{table}_nulls.csv", newline="", encoding="utf-8") as handle:
+        reader = csv.reader(handle)
+        next(reader)
+        values = [int(value) for value in next(reader)]
+    return sum(1 for value in values if value > 0), sum(values)
+
+
+def summarize(root: Path | None = None) -> Path:
+    """
+    Renders the profile summary for the 3.2 case description and returns its path.
+
+    A pure formatting pass over results/profile/<dataset>/*.csv — no lake access.
+    Writes profile_summary.md next to the inputs and echoes the markdown.
+    """
+    root = root or find_root()
+    profile_dir = root / PROFILE_DIR
+    required = [profile_dir / "ingest_log.csv", profile_dir / "perpub_sex_codelist.csv"]
+    required += [profile_dir / "perpub_sex_imputation_share.csv"]
+    required += [profile_dir / f"{table}_{kind}.csv" for table in TABLES for kind in ("structure", "nulls")]
+    missing = [path.name for path in required if not path.is_file()]
+    if missing:
+        raise click.ClickException(
+            f"Missing profile inputs: {', '.join(missing)} — run 'gdgap ingest {DATASET}' and 'gdgap profile' first."
+        )
+    counts = _latest_row_counts(profile_dir)
+    structure_rows = []
+    for table in TABLES:
+        n_columns, breakdown = _structure_summary(profile_dir, table)
+        null_columns, null_cells = _null_summary(profile_dir, table)
+        n_rows = counts.get(table, 0)
+        null_share = 100.0 * null_cells / (n_rows * n_columns) if n_rows and n_columns else 0.0
+        structure_rows.append(
+            [table, f"{n_rows:,}", n_columns, breakdown, null_columns, f"{null_cells:,}", f"{null_share:.4f}%"]
+        )
+    codelist = _read_csv_rows(profile_dir / "perpub_sex_codelist.csv")
+    variable_totals = Counter()
+    for row in codelist:
+        variable_totals[row["variable"]] += int(row["n"])
+    codelist_rows = [
+        [
+            row["variable"],
+            row["value"],
+            SEX_CODE_LABELS.get(row["value"], ""),
+            f"{int(row['n']):,}",
+            f"{100.0 * int(row['n']) / variable_totals[row['variable']]:.4f}%",
+        ]
+        for row in codelist
+    ]
+    imputation = _read_csv_rows(profile_dir / "perpub_sex_imputation_share.csv")[0]
+    imputation_row = [
+        [f"{int(imputation['rows_total']):,}", f"{int(imputation['rows_imputed']):,}", f"{imputation['imputed_pct']}%"]
+    ]
+    generated = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
+    content = "\n".join(
+        [
+            f"# {DATASET} profile summary (case description ground truth)",
+            "",
+            f"Generated {generated} by `gdgap summarize` — a formatting pass over `{PROFILE_DIR.as_posix()}/*.csv`.",
+            f"Regenerate with `gdgap ingest {DATASET} && gdgap profile && gdgap summarize`. Source: own results.",
+            "",
+            "## Structure and null shares",
+            "",
+            tabulate(
+                structure_rows,
+                headers=[
+                    "file",
+                    "rows",
+                    "columns",
+                    "column types",
+                    "columns with nulls",
+                    "null cells",
+                    "null cell share",
+                ],
+                tablefmt="github",
+            ),
+            "",
+            f"## Code lists for the sex variable and its imputed companion (`{SEX_COL}`, `{SEX_IMP_COL}`)",
+            "",
+            tabulate(codelist_rows, headers=["variable", "code", "codebook label", "n", "share"], tablefmt="github"),
+            "",
+            "## Sex imputation share (perpub)",
+            "",
+            tabulate(imputation_row, headers=["rows total", "rows imputed", "imputed share"], tablefmt="github"),
+            "",
+            f"Imputed means the value in `{SEX_IMP_COL}` differs from the reported `{SEX_COL}` "
+            "(reserve codes -7/-8 resolved, plus consistency edits).",
+            "",
+        ]
+    )
+    summary_path = profile_dir / SUMMARY_FILE
+    summary_path.write_text(content, encoding="utf-8")
+    click.echo(content)
+    click.echo(f"✓ Summary written to {summary_path.relative_to(root).as_posix()}")
+    return summary_path

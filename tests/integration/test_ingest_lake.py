@@ -3,6 +3,9 @@
 import csv
 from contextlib import closing
 
+import click
+import pytest
+
 from gdgap.ingest import nhts2017
 
 
@@ -44,3 +47,23 @@ def test_profile_emits_w1_csvs(lake_root):
     # One of the three fixture persons carries an imputed sex value (-7 reported, 02 imputed)
     assert share["rows_total"] == "3"
     assert share["rows_imputed"] == "1"
+
+
+def test_summarize_renders_markdown_from_csvs(lake_root):
+    """Formats the 3.2 summary from the profile CSVs alone and reports fixture ground truth."""
+    nhts2017.ingest(root=lake_root)
+    nhts2017.profile(root=lake_root)
+    summary_path = nhts2017.summarize(root=lake_root)
+    text = summary_path.read_text(encoding="utf-8")
+    assert summary_path.parent == lake_root / nhts2017.PROFILE_DIR
+    for table in nhts2017.TABLES:
+        assert table in text
+    # The fixture imputes one of three persons: 33.3333% share, and codebook labels are attached
+    assert "33.3333%" in text
+    assert "Male" in text
+
+
+def test_summarize_requires_profile_outputs(lake_root):
+    """Fails with a hint when the profiling CSVs have not been generated yet."""
+    with pytest.raises(click.ClickException, match="gdgap profile"):
+        nhts2017.summarize(root=lake_root)

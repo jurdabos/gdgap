@@ -380,6 +380,15 @@ def profile_cmd() -> None:
     nhts2017.profile()
 
 
+@cli.command("summarize")
+def summarize_cmd() -> None:
+    """Renders the profile summary table (thesis 3.2) from the profiling CSVs."""
+    # Importing lazily so push invocations skip the duckdb import
+    from gdgap.ingest import nhts2017
+
+    nhts2017.summarize()
+
+
 def main() -> None:
     """Entry point for the CLI."""
     cli()
