@@ -31,7 +31,7 @@ Primary sources: 2017 NHTS Data User Guide (Westat for FHWA, March 2018), Codebo
 - **Does the dataset contain confidential data?** No. The public-use files are de-identified: no names, addresses, or coordinates; geography is limited to state, census division/region, and categorical block-group densities.
 - **Might any data be offensive or cause anxiety?** No; content is travel behavior and demographics.
 - **Does the dataset identify subpopulations?** Yes, by design: age, sex, race, ethnicity, household income (`HHFAMINC`, 11 bands), worker/driver status, medical conditions affecting travel, etc.
-- **Is it possible to identify individuals?** Not intended to be: FHWA applies disclosure-avoidance (suppression/coarsening of geography and extreme values) before release. Residual re-identification risk in combination with external data is the standard, low, public-use-file risk.
+- **Is it possible to identify individuals?** Not intended to be: FHWA applies disclosure avoidance (suppression/coarsening of geography and extreme values) before release. Residual re-identification risk in combination with external data is the standard, low, public-use-file risk.
 - **Does the dataset contain sensitive data?** Categorical race/ethnicity, income, and a travel-relevant medical-condition indicator are present; no religion, politics, biometrics, or precise locations.
 - **Any other comments?** None.
 
@@ -57,7 +57,7 @@ Primary sources: 2017 NHTS Data User Guide (Westat for FHWA, March 2018), Codebo
 
 - **Has the dataset been used for any tasks already?** Extensively: FHWA's Summary of Travel Trends, federal performance reporting, state/MPO travel demand model estimation and calibration, and research in public health, energy, and safety.
 - **Is there a repository of papers/systems using the dataset?** Yes, FHWA maintains a compendium of NHTS-based publications at https://nhts.ornl.gov.
-- **What (other) tasks could the dataset be used for?** Local: in gdgap, benchmark workloads over a DuckDB/DuckLake lake — schema-blind vs. schema-aware DDL (`sql/ddl/blind`, `sql/ddl/aware`), profiling and query-plan comparisons recorded under `results/`.
+- **What (other) tasks could the dataset be used for?** Local: in gdgap, benchmark workloads over a DuckDB/DuckLake instance — schema-blind vs. schema-aware DDL (`sql/ddl/blind`, `sql/ddl/aware`), profiling and query-plan comparisons recorded under `results/`.
 - **Is there anything that might impact future uses?** Weights are mandatory for population statements; special codes must be handled before numeric aggregation (they are valid category labels, not NULLs); 2017 methodology changes break naive trend comparisons with earlier survey waves.
 - **Are there tasks for which the dataset should not be used?** Sub-state or small-area estimation outside add-on areas; longitudinal/panel inference (households are not followed over time); any attempt at re-identification.
 - **Any other comments?** None.

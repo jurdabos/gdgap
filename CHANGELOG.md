@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `sql/00_attach.sql`: DuckLake bootstrap per runbook Phase C — installs the `ducklake` extension and attaches `catalog/gdgap.ducklake` (local catalog by default, per ADR-0001) with `DATA_PATH 'data/lake/'`; verified end-to-end (snapshot 0 recorded, catalog file created, both gitignored as data plane).
 - `datasets/nhts2017/DATASHEET.md`: Gebru et al.-style datasheet (Motivation/Composition/Collection/Preprocessing/Uses/Distribution/Maintenance) answered for the 2017 NHTS public-use files from the FHWA User Guide and Codebook v1.2; instance counts verified against the local CSVs via DuckDB and tied to `manifest.json`/`checksums.txt`.
 - `docs/adr/0001-engine-and-lake.md`: ADR recording the engine pin — DuckDB v1.5.4 at runtime, `duckdb==1.5.4` locked in `uv.lock` — plus the lake/catalog layout and the upgrade procedure.
 - `.gitkeep` placeholders in `sql/ddl/blind`, `sql/ddl/aware`, `results/profile`, `results/plans`, `docs/adr`, and `tests` so the empty repo-plane directory skeleton is committable (git tracks files only, never bare directories).
