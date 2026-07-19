@@ -389,6 +389,18 @@ def summarize_cmd() -> None:
     nhts2017.summarize()
 
 
+@cli.command("publish")
+@click.option("--target", default="gdgap_lake", show_default=True, help="MotherDuck DuckLake database name")
+@click.option("--force", is_flag=True, help="Drop and republish tables that already exist on the target")
+@click.option("--maintain", is_flag=True, help="Expire old snapshots and clean up files on the target afterwards")
+def publish_cmd(target: str, force: bool, maintain: bool) -> None:
+    """Mirrors the local lake's dataset schema into a MotherDuck-hosted DuckLake."""
+    # Importing lazily so push invocations skip the duckdb import
+    from gdgap.ingest import nhts2017
+
+    nhts2017.publish(target=target, force=force, maintain=maintain)
+
+
 def main() -> None:
     """Entry point for the CLI."""
     cli()

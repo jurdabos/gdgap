@@ -10,6 +10,9 @@ profiling CSVs (structure, null shares, sex code list, imputation share).
 Multi-dataset invariant (ADR-0002): every table lives in a lake schema named after
 its dataset (lake.nhts2017.<table>) and every profile artefact lands under
 results/profile/<dataset>/, so a second dataset can never collide with this one.
+
+publish() mirrors the dataset schema into a MotherDuck-hosted DuckLake; the local
+lake stays the reproducible source of truth.
 """
 
 import csv
@@ -32,6 +35,9 @@ MANIFEST_PATH = Path("datasets/nhts2017/manifest.json")
 ATTACH_SQL = Path("sql/00_attach.sql")
 PROFILE_DIR = Path("results/profile") / DATASET
 INGEST_LOG = PROFILE_DIR / "ingest_log.csv"
+PUBLISH_LOG = PROFILE_DIR / "publish_log.csv"
+# Default MotherDuck DuckLake database mirroring the local lake
+MD_LAKE = "gdgap_lake"
 # Sex variable and its imputed companion, spelled exactly as in the FHWA codebook. R_SEX holds the reported
 # code (01/02, with -7/-8 reserve codes); R_SEX_IMP holds the same value with imputations filled in, so a row
 # was imputed exactly when the two differ. Both arrive as zero-padded VARCHAR codes and stay that way raw.
@@ -128,13 +134,11 @@ def _table_exists(con: duckdb.DuckDBPyConnection, table: str) -> bool:
     return bool(row and row[0])
 
 
-def _append_log(root: Path, rows: list[dict]) -> None:
-    """Appends ingest rows to results/profile/ingest_log.csv, writing the header once."""
-    log_path = root / INGEST_LOG
-    log_path.parent.mkdir(parents=True, exist_ok=True)
-    fieldnames = ["ts_utc", "dataset", "table", "action", "rows", "sha256"]
-    is_new = not log_path.exists()
-    with open(log_path, "a", newline="", encoding="utf-8") as handle:
+def _append_csv(path: Path, fieldnames: list[str], rows: list[dict]) -> None:
+    """Appends rows to a CSV log, writing the header when the file is new."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    is_new = not path.exists()
+    with open(path, "a", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         if is_new:
             writer.writeheader()
@@ -183,7 +187,7 @@ def ingest(root: Path | None = None, force: bool = False) -> list[dict]:
             )
         snapshot = con.execute("select max(snapshot_id) from lake.snapshots()").fetchone()[0]
         click.echo(f"✓ Lake at snapshot {snapshot} — audit trail: select * from lake.snapshots()")
-    _append_log(root, log_rows)
+    _append_csv(root / INGEST_LOG, ["ts_utc", "dataset", "table", "action", "rows", "sha256"], log_rows)
     click.echo(f"✓ Row counts recorded in {INGEST_LOG.as_posix()}")
     return log_rows
 
@@ -358,3 +362,144 @@ def summarize(root: Path | None = None) -> Path:
     click.echo(content)
     click.echo(f"✓ Summary written to {summary_path.relative_to(root).as_posix()}")
     return summary_path
+
+
+def _md_connect(root: Path, target: str) -> duckdb.DuckDBPyConnection:
+    """
+    Opens a fresh MotherDuck connection with the target DuckLake ensured and the local lake attached.
+
+    Fresh connections matter: long-lived MotherDuck sessions have shown stale catalog
+    state after heavy writes (a table once resolved into the wrong schema mid-session).
+    """
+    if not os.environ.get("MOTHERDUCK_TOKEN"):
+        raise click.ClickException("MOTHERDUCK_TOKEN is not set — export it, then rerun 'gdgap publish'.")
+    con = duckdb.connect("md:")
+    con.execute(f"create database if not exists {target} (type ducklake)")
+    con.execute((root / ATTACH_SQL).read_text(encoding="utf-8"))
+    return con
+
+
+def _schemas_holding(con: duckdb.DuckDBPyConnection, target: str, table: str) -> list[str]:
+    """Returns the schemas of the target catalog that contain a table with the given name."""
+    rows = con.execute(
+        "select schema_name from duckdb_tables() where database_name = ? and table_name = ? order by schema_name",
+        [target, table],
+    ).fetchall()
+    return [row[0] for row in rows]
+
+
+def _md_verify_connect() -> duckdb.DuckDBPyConnection:
+    """Opens a minimal fresh MotherDuck connection for placement verification (no local attach)."""
+    return duckdb.connect("md:")
+
+
+def _ensure_placement(vcon: duckdb.DuckDBPyConnection, target: str, table: str, expected_rows: int) -> None:
+    """
+    Verifies that a published table sits in the dataset schema of the target catalog.
+
+    Repairs server-side (CTAS + drop) when the table landed in exactly one other schema
+    with the expected row count; raises when the table is missing or counts differ.
+    """
+    schemas = _schemas_holding(vcon, target, table)
+    if DATASET not in schemas:
+        if len(schemas) != 1:
+            raise click.ClickException(f"{table} missing from {target}.{DATASET} after publish")
+        wrong = schemas[0]
+        misplaced_n = vcon.execute(f"select count(*) from {target}.{wrong}.{table}").fetchone()[0]
+        if misplaced_n != expected_rows:
+            raise click.ClickException(
+                f"{table} landed in {target}.{wrong} with {misplaced_n} rows (expected {expected_rows})"
+            )
+        click.echo(f"   ⚠ {table} landed in {target}.{wrong} — repairing server-side")
+        vcon.execute(f"create table {target}.{DATASET}.{table} as select * from {target}.{wrong}.{table}")
+        vcon.execute(f"drop table {target}.{wrong}.{table}")
+    n = vcon.execute(f"select count(*) from {target}.{DATASET}.{table}").fetchone()[0]
+    if n != expected_rows:
+        raise click.ClickException(
+            f"{table}: row count mismatch (local {expected_rows}, {target} {n}) — rerun with --force to republish"
+        )
+
+
+def _maintain(con: duckdb.DuckDBPyConnection, target: str) -> None:
+    """
+    Expires non-current snapshots on the target DuckLake and deletes their files.
+
+    MotherDuck runs no automatic DuckLake maintenance, so publish offers this pass to
+    keep the mirror's storage footprint at the current state (the mirror carries no
+    time-travel guarantees; the local lake is the source of truth, see ADR-0003).
+    """
+    con.execute(f"call ducklake_expire_snapshots('{target}', older_than => now())")
+    con.execute(f"call ducklake_cleanup_old_files('{target}', cleanup_all => true)")
+    remaining = con.execute(f"select count(*) from {target}.snapshots()").fetchone()[0]
+    click.echo(f"✓ Maintenance: expired old snapshots and cleaned files — {remaining} snapshot(s) retained")
+
+
+def publish(
+    root: Path | None = None,
+    target: str = MD_LAKE,
+    force: bool = False,
+    maintain: bool = False,
+    connect=None,
+    verify_connect=None,
+) -> list[dict]:
+    """
+    Mirrors the dataset schema of the local lake into a MotherDuck-hosted DuckLake.
+
+    Publishes table by table, verifying schema placement and row counts after each one
+    so the ADR-0002 invariant holds remotely too; on the default MotherDuck path the
+    verification runs on a fresh target-only connection, since DuckDB forbids attaching
+    the local catalog twice in one process. Existing tables are skipped unless force is
+    set; maintain expires old snapshots and cleans files afterwards. The local lake
+    stays the source of truth.
+    """
+    root = root or find_root()
+
+    def _default_connect() -> duckdb.DuckDBPyConnection:
+        return _md_connect(root, target)
+
+    if connect is None:
+        connect = _default_connect
+        if verify_connect is None:
+            verify_connect = _md_verify_connect
+    ts_utc = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
+    log_rows: list[dict] = []
+    with _chdir(root):
+        with closing(connect()) as con:
+            con.execute(f"create schema if not exists {target}.{DATASET}")
+            for table in TABLES:
+                local_n = con.execute(f"select count(*) from {_qualified(table)}").fetchone()[0]
+                placed = _schemas_holding(con, target, table)
+                if DATASET in placed and not force:
+                    action = "skipped"
+                else:
+                    action = "republished" if DATASET in placed else "published"
+                    if DATASET in placed:
+                        con.execute(f"drop table {target}.{DATASET}.{table}")
+                    con.execute(f"create table {target}.{DATASET}.{table} as select * from {_qualified(table)}")
+                # Verifying placement after every table; stale sessions have misplaced tables before
+                if verify_connect is not None:
+                    with closing(verify_connect()) as vcon:
+                        _ensure_placement(vcon, target, table, local_n)
+                else:
+                    _ensure_placement(con, target, table, local_n)
+                click.echo(f"  {target}.{DATASET}.{table}: {action}, {local_n} rows ✓")
+                log_rows.append(
+                    {
+                        "ts_utc": ts_utc,
+                        "dataset": DATASET,
+                        "table": table,
+                        "action": action,
+                        "rows": local_n,
+                        "target": target,
+                    }
+                )
+            if maintain:
+                # Running maintenance on a fresh connection when available; else the writer one
+                if verify_connect is not None:
+                    with closing(verify_connect()) as mcon:
+                        _maintain(mcon, target)
+                else:
+                    _maintain(con, target)
+    _append_csv(root / PUBLISH_LOG, ["ts_utc", "dataset", "table", "action", "rows", "target"], log_rows)
+    click.echo(f"✓ Publish log appended to {PUBLISH_LOG.as_posix()}")
+    return log_rows
