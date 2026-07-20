@@ -401,6 +401,23 @@ def publish_cmd(target: str, force: bool, maintain: bool) -> None:
     nhts2017.publish(target=target, force=force, maintain=maintain)
 
 
+@cli.command("build")
+@click.option("--variant", type=click.Choice(["blind", "aware"]), required=True, help="Warehouse variant to build")
+@click.option(
+    "--backend",
+    type=click.Choice(["ducklake", "innodb"]),
+    default="ducklake",
+    show_default=True,
+    help="Execution backend (innodb is the row-oriented foil)",
+)
+def build_cmd(variant: str, backend: str) -> None:
+    """Builds one warehouse variant from the lake, enforcing the R-number header gate."""
+    # Importing lazily so push invocations skip the duckdb import
+    from gdgap.build import build
+
+    build(variant=variant, backend_name=backend)
+
+
 def main() -> None:
     """Entry point for the CLI."""
     cli()

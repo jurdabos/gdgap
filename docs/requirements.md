@@ -1,6 +1,6 @@
 # Requirements registry — R1..R12
 
-This registry converts the advocacy corpus of thesis subchapter 2.3 into the numbered, engineer-inspectable requirements the artefact must satisfy. It is simultaneously the DSR "define requirements" activity (Johannesson & Perjons; see thesis 3.1), and it is the traceability spine of the project: 3.3 designs against these R-numbers, ch. 4 measures against them, and 5.1 audits each as satisfied / partial / unmet.
+This registry converts the advocacy corpus of thesis subchapter 2.3 into numbered, engineer-inspectable requirements the artefact must satisfy. It is simultaneously the DSR "define requirements" activity (Johannesson & Perjons; see thesis 3.1), and it is the traceability spine of the project: 3.3 designs against these R-numbers, ch. 4 measures against them, and 5.1 audits each as satisfied/partial/unmet.
 
 Corpus streams: disaggregation mandates (SAGER — Heidari et al., 2016; UN Women, 2018; Data2X — Vaitla et al., 2017), stewardship instruments (datasheets — Gebru et al., 2021; FAIR — Wilkinson et al., 2016), data-feminist design principles (D'Ignazio & Klein, 2020; the Manifest-No — Cifor et al., 2019), dataset-quality scoring (the Venus score — Chicco et al., 2025), professional duty (ACM, 2018), and gender-sensitive responsible innovation across all stages (AIRR — Finlay-Smits et al., 2024).
 

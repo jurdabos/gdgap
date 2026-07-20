@@ -2,9 +2,12 @@
 
 import hashlib
 import json
+import shutil
 from pathlib import Path
 
 import pytest
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 ATTACH_SQL = """INSTALL ducklake;
 ATTACH 'ducklake:catalog/gdgap.ducklake' AS lake (DATA_PATH 'data/lake/');
@@ -13,8 +16,14 @@ USE lake;
 
 CSV_FIXTURES = {
     "hhpub": "HOUSEID,HHSIZE\n1,2\n2,1\n",
-    "perpub": "HOUSEID,PERSONID,R_SEX,R_SEX_IMP\n1,1,01,01\n1,2,-7,02\n2,1,02,02\n",
-    "trippub": "HOUSEID,PERSONID,TDTRPNUM\n1,1,1\n1,1,2\n",
+    "perpub": (
+        "HOUSEID,PERSONID,R_SEX,R_SEX_IMP,R_AGE,WTPERFIN\n1,1,01,01,30,150.0\n1,2,-7,02,40,120.0\n2,1,02,02,25,90.0\n"
+    ),
+    "trippub": (
+        "HOUSEID,PERSONID,TDTRPNUM,TRPTRANS,WHYTO,WHYFROM,TRIPPURP,TRPMILES,WTTRDFIN\n"
+        "1,1,1,03,06,01,HBO,5.0,100.0\n"
+        "1,1,2,01,01,06,HBO,2.5,80.0\n"
+    ),
     "vehpub": "HOUSEID,VEHID\n1,1\n",
 }
 
@@ -48,4 +57,8 @@ def lake_root(tmp_path: Path) -> Path:
     meta = tmp_path / "datasets" / "nhts2017"
     meta.mkdir(parents=True)
     (meta / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    # Shipping the real DDL tree and requirements registry so builds and the R-gate run against the canon
+    shutil.copytree(REPO_ROOT / "sql" / "ddl", tmp_path / "sql" / "ddl")
+    (tmp_path / "docs").mkdir()
+    shutil.copy(REPO_ROOT / "docs" / "requirements.md", tmp_path / "docs" / "requirements.md")
     return tmp_path
