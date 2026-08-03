@@ -57,8 +57,10 @@ def lake_root(tmp_path: Path) -> Path:
     meta = tmp_path / "datasets" / "nhts2017"
     meta.mkdir(parents=True)
     (meta / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
-    # Shipping the real DDL tree and requirements registry so builds and the R-gate run against the canon
+    # Shipping the real DDL tree, bench catalogue, and requirements registry so builds, the R-gate,
+    # and the bench harness all run against the canon
     shutil.copytree(REPO_ROOT / "sql" / "ddl", tmp_path / "sql" / "ddl")
+    shutil.copytree(REPO_ROOT / "sql" / "bench", tmp_path / "sql" / "bench")
     (tmp_path / "docs").mkdir()
     shutil.copy(REPO_ROOT / "docs" / "requirements.md", tmp_path / "docs" / "requirements.md")
     return tmp_path

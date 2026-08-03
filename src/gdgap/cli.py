@@ -418,6 +418,48 @@ def build_cmd(variant: str, backend: str) -> None:
     build(variant=variant, backend_name=backend)
 
 
+@cli.command("bench")
+@click.option(
+    "--backend",
+    type=click.Choice(["ducklake", "innodb"]),
+    default="ducklake",
+    show_default=True,
+    help="Execution backend (innodb is the row-oriented foil)",
+)
+@click.option("--variant", type=click.Choice(["blind", "aware"]), required=True, help="Warehouse variant to bench")
+@click.option(
+    "--temperature",
+    type=click.Choice(["warm"]),
+    default="warm",
+    show_default=True,
+    help="Cache protocol; cold stays rejected until its reset method has an ADR (ADR-0004)",
+)
+@click.option(
+    "--repetitions",
+    type=click.IntRange(min=1),
+    default=5,
+    show_default=True,
+    help="Recorded repetitions per query (evidence runs use >= 5 per ADR-0004)",
+)
+@click.option("--seed", type=int, default=None, help="Query-order shuffle seed (generated and persisted when omitted)")
+@click.option("--skip-storage", is_flag=True, help="Skip the storage-cost measurement pass")
+def bench_cmd(
+    backend: str, variant: str, temperature: str, repetitions: int, seed: int | None, skip_storage: bool
+) -> None:
+    """Runs the ADR-0004 warm benchmark protocol for one backend/variant matrix cell."""
+    # Importing lazily so push invocations skip the duckdb import
+    from gdgap.bench.run import run_bench
+
+    run_bench(
+        backend_name=backend,
+        variant=variant,
+        temperature=temperature,
+        repetitions=repetitions,
+        seed=seed,
+        skip_storage=skip_storage,
+    )
+
+
 def main() -> None:
     """Entry point for the CLI."""
     cli()
