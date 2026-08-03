@@ -33,6 +33,24 @@ def test_tables_live_in_dataset_schema(lake_root):
     assert rows == [(nhts2017.DATASET, table) for table in sorted(nhts2017.TABLES)]
 
 
+def test_ingest_pins_sex_codes_verbatim(lake_root):
+    """Stores R_SEX and R_SEX_IMP as declared VARCHAR, reserve codes and zero-padding intact (R7)."""
+    nhts2017.ingest(root=lake_root)
+    with nhts2017._chdir(lake_root), closing(nhts2017._connect(lake_root)) as con:
+        types = dict(
+            con.execute(
+                f"select column_name, column_type from (describe {nhts2017._qualified('perpub')}) "
+                f"where column_name in ('{nhts2017.SEX_COL}', '{nhts2017.SEX_IMP_COL}')"
+            ).fetchall()
+        )
+        values = con.execute(
+            f"select {nhts2017.SEX_COL}, {nhts2017.SEX_IMP_COL} from {nhts2017._qualified('perpub')} order by 1"
+        ).fetchall()
+    assert types == {nhts2017.SEX_COL: "VARCHAR", nhts2017.SEX_IMP_COL: "VARCHAR"}
+    # Verbatim survival: the -7 reserve code and the zero-padded 01/02 codes, never numerics or NULLs
+    assert values == [("-7", "02"), ("01", "01"), ("02", "02")]
+
+
 def test_profile_emits_w1_csvs(lake_root):
     """Writes structure and null CSVs per table plus the sex code list and imputation share."""
     nhts2017.ingest(root=lake_root)

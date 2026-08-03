@@ -1,0 +1,80 @@
+---
+title: "gdgap conceptual model — NHTS 2017 domain with the gender-aware dimension (IE/Martin crow's-foot notation)"
+---
+%% The W2 artifact (thesis 3.3, objective E): conceptual/logical model of the reference design.
+%% Notation: Information Engineering (James Martin) crow's foot, as rendered by Mermaid erDiagram.
+%% Grounding: entity sets per the FHWA codebook (Chen reading in thesis 3.2); aware-variant
+%% constructs per sql/ddl/aware/01..05; the blind baseline (sql/ddl/blind/) is this diagram
+%% minus SEX_CODE, NHTS_SEX_MAP and PERSON_SEX — that omission is the measured contrast (R11).
+%% Traceability: R1/R6 code list; R7 reserve-code mapping; R3 provenance; R8 SCD-2 validity;
+%% R2 disaggregation via the PERSON join path, never via a copied sex column on TRIP.
+%% DDL mapping: HOUSEHOLD=lake.nhts2017.hhpub, PERSON=perpub/aware.fact_person,
+%% VEHICLE=vehpub (staged only, not warehoused), TRIP=trippub/aware.fact_trip,
+%% SEX_CODE=aware.dim_sex_code, NHTS_SEX_MAP=aware.map_nhts_sex, PERSON_SEX=aware.dim_person_sex.
+erDiagram
+    HOUSEHOLD ||--|{ PERSON : comprises
+    HOUSEHOLD ||--o{ VEHICLE : owns
+    PERSON ||--o{ TRIP : makes
+    VEHICLE |o..o{ TRIP : carries
+    PERSON ||--|{ PERSON_SEX : "has recorded"
+    SEX_CODE ||--o{ PERSON_SEX : "classifies (analysis value)"
+    SEX_CODE ||--o{ PERSON_SEX : "classifies (as reported)"
+    SEX_CODE ||--o{ NHTS_SEX_MAP : standardises
+
+    HOUSEHOLD {
+        string houseid PK
+        int hh_size
+        int hh_vehicle_count
+        string income_band "HHFAMINC bands, reserve codes intact (R7)"
+        string urban_rural
+        string census_region
+    }
+
+    PERSON {
+        string houseid PK, FK
+        string personid PK
+        int r_age
+        decimal person_weight "WTPERFIN survey weight"
+    }
+    %% Deliberately carrying no sex attribute on PERSON or TRIP: disaggregation
+    %% arrives through the PERSON_SEX dimension join (R2), not a copied column.
+
+    VEHICLE {
+        string houseid PK, FK
+        string vehid PK
+        string vehicle_type "staged in lake.nhts2017 only, not warehoused"
+    }
+
+    TRIP {
+        string houseid PK, FK
+        string personid PK, FK
+        string tdtrpnum PK
+        string trip_purpose "TRIPPURP; WHYTO/WHYFROM kept verbatim (R7)"
+        string mode "TRPTRANS"
+        decimal trip_miles
+        decimal trip_weight "WTTRDFIN"
+    }
+
+    SEX_CODE {
+        string sex_code PK "ISO/IEC 5218:2022 core 0/1/2/9; extensions X, U (R6)"
+        string label "X = non-binary or another gender identity"
+        string source_standard "standard row vs gdgap extension (McClure et al., 2022)"
+        bool is_extension "sex (ISO core) and gender identity (extension) stay distinct (R1)"
+    }
+
+    NHTS_SEX_MAP {
+        string nhts_code PK "raw R_SEX / R_SEX_IMP incl. reserves -7/-8/-9"
+        string sex_code FK
+        string note "refusal (-7 to U) distinct from ignorance (-8/-9 to 0) (R7)"
+    }
+
+    PERSON_SEX {
+        string houseid PK, FK
+        string personid PK, FK
+        date valid_from PK "SCD-2 interval start (R8)"
+        date valid_to "open (NULL) while current"
+        bool is_current
+        string sex_code FK "analysis value, from R_SEX_IMP"
+        string sex_code_reported FK "pre-imputation state kept exhibitable (R3)"
+        string sex_source "reported / imputed / edited - row-level provenance (R3)"
+    }

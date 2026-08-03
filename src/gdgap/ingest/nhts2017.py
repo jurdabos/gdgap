@@ -26,6 +26,7 @@ from pathlib import Path
 
 import click
 import duckdb
+from dotenv import load_dotenv
 from tabulate import tabulate
 
 DATASET = "nhts2017"
@@ -40,9 +41,14 @@ PUBLISH_LOG = PROFILE_DIR / "publish_log.csv"
 MD_LAKE = "gdgap_lake"
 # Sex variable and its imputed companion, spelled exactly as in the FHWA codebook. R_SEX holds the reported
 # code (01/02, with -7/-8 reserve codes); R_SEX_IMP holds the same value with imputations filled in, so a row
-# was imputed exactly when the two differ. Both arrive as zero-padded VARCHAR codes and stay that way raw.
+# was imputed exactly when the two differ. Both arrive as zero-padded codes and are pinned VARCHAR below.
 SEX_COL = "R_SEX"
 SEX_IMP_COL = "R_SEX_IMP"
+# Declared schema-on-write contract (R7): the codebook defines these as opaque codes, not quantities, so
+# ingest pins them VARCHAR instead of leaving the type to the sniffer's leading-zero heuristic — verbatim
+# survival of reserve codes and zero-padding no longer depends on inference details or upstream padding.
+# Scoped per table because read_csv rejects types keys naming columns absent from the file.
+TYPE_OVERRIDES: dict[str, dict[str, str]] = {"perpub": {SEX_COL: "VARCHAR", SEX_IMP_COL: "VARCHAR"}}
 # Code labels per the FHWA codebook, for the human-readable summary only; raw codes stay untouched
 SEX_CODE_LABELS = {
     "-9": "Not ascertained",
@@ -145,6 +151,16 @@ def _append_csv(path: Path, fieldnames: list[str], rows: list[dict]) -> None:
         writer.writerows(rows)
 
 
+def _read_csv_options(table: str) -> str:
+    """Returns the read_csv option list for a table, appending any declared type overrides."""
+    options = "header = true, sample_size = -1"
+    overrides = TYPE_OVERRIDES.get(table)
+    if overrides:
+        spec = ", ".join(f"'{column}': '{sql_type}'" for column, sql_type in overrides.items())
+        options += f", types = {{{spec}}}"
+    return options
+
+
 def ingest(root: Path | None = None, force: bool = False) -> list[dict]:
     """
     Ingests the four NHTS 2017 CSVs into the lake, idempotently.
@@ -171,7 +187,7 @@ def ingest(root: Path | None = None, force: bool = False) -> list[dict]:
                     con.execute(f"drop table {_qualified(table)}")
                 con.execute(
                     f"create table {_qualified(table)} as "
-                    f"select * from read_csv('{(RAW_DIR / csv_name).as_posix()}', header = true, sample_size = -1)"
+                    f"select * from read_csv('{(RAW_DIR / csv_name).as_posix()}', {_read_csv_options(table)})"
                 )
             n = con.execute(f"select count(*) from {_qualified(table)}").fetchone()[0]
             click.echo(f"  {_qualified(table)}: {action}, {n} rows")
@@ -371,8 +387,12 @@ def _md_connect(root: Path, target: str) -> duckdb.DuckDBPyConnection:
     Fresh connections matter: long-lived MotherDuck sessions have shown stale catalog
     state after heavy writes (a table once resolved into the wrong schema mid-session).
     """
+    # Loading .env so the token works without a per-session export (never logged or echoed)
+    load_dotenv(root / ".env")
     if not os.environ.get("MOTHERDUCK_TOKEN"):
-        raise click.ClickException("MOTHERDUCK_TOKEN is not set — export it, then rerun 'gdgap publish'.")
+        raise click.ClickException(
+            "MOTHERDUCK_TOKEN is not set — add it to .env or export it, then rerun 'gdgap publish'."
+        )
     con = duckdb.connect("md:")
     con.execute(f"create database if not exists {target} (type ducklake)")
     con.execute((root / ATTACH_SQL).read_text(encoding="utf-8"))
