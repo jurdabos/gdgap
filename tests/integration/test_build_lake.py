@@ -56,6 +56,9 @@ def test_build_aware_dimension_and_measures(lake_root):
     assert mislabelled == 0
     # NHTS 2017 collects no gender identity: the attribute exhibits non-collection by construction
     assert _lake_query(lake_root, "select distinct gender_identity_code from lake.aware.dim_person_sex") == [("NC",)]
+    # Verbatim raw retention (R7, ADR-0007): reserve states stay distinguishable next to mapped codes
+    raw_pairs = _lake_query(lake_root, "select r_sex_raw, sex_code_reported from lake.aware.dim_person_sex order by 1")
+    assert raw_pairs == [("-7", "U"), ("01", "1"), ("02", "2")]
     sources = dict(_lake_query(lake_root, "select sex_source, count(*) from lake.aware.dim_person_sex group by 1"))
     assert sources == {"reported": 2, "imputed": 1}
     imputation = dict(_lake_query(lake_root, "select sex_source, persons from lake.aware.v_sex_imputation_share"))

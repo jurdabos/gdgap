@@ -57,8 +57,8 @@ Corpus streams: disaggregation mandates (SAGER — Heidari et al., 2016; UN Wome
 
 - Requirement: Reserve codes — prefer not to answer, don't know, not ascertained, appropriate skip — survive ingest, storage, and aggregation as distinct first-class values; no silent coercion to NULL, to a default sex, or to each other; aggregations can always exhibit them.
 - Sources: D'Ignazio & Klein (2020) — embrace pluralism, consider context; Cifor et al. (2019) — refusal carries meaning and must not be erased.
-- Design hook: raw codes preserved verbatim at ingest by a declared `read_csv` type override pinning `R_SEX`/`R_SEX_IMP` to VARCHAR (zero-padding included) rather than leaving the type to sniffer inference; aware-variant code list gives each reserve state its own row.
-- Evidence: profiling structure/codelist CSVs (0 NULL cells, reserve codes intact); 5.1 queries exposing the categories.
+- Design hook: raw codes preserved verbatim at ingest by a declared `read_csv` type override pinning `R_SEX`/`R_SEX_IMP` to VARCHAR (zero-padding included) rather than leaving the type to sniffer inference; the reserve-code mapping gives each raw state its own row; the analytical dimension retains the reported code verbatim (`r_sex_raw`), so refusal, don't-know, and not-ascertained stay distinguishable in warehouse aggregations even though the ISO analysis domain merges the two ignorance kinds into `0` (ADR-0007).
+- Evidence: profiling structure/codelist CSVs (0 NULL cells, reserve codes intact); `r_sex_raw` in the aware dimension; 5.1 queries exposing the categories.
 
 ## R8 — Gender is time-variant; the model records change
 

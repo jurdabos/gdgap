@@ -88,6 +88,7 @@ erDiagram
         bool is_current
         string sex_code FK "analysis value, from R_SEX_IMP"
         string sex_code_reported FK "pre-imputation state kept exhibitable (R3)"
+        string r_sex_raw "verbatim R_SEX; -7/-8/-9 stay distinguishable in aggregations (R7)"
         string sex_source "reported / imputed / edited - row-level provenance (R3)"
         string gender_identity_code FK "NC by construction - NHTS 2017 collects no gender identity (R1)"
     }
