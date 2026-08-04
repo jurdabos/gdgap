@@ -39,11 +39,23 @@ def test_build_blind_creates_queryable_warehouse(lake_root):
 
 
 def test_build_aware_dimension_and_measures(lake_root):
-    """Builds the aware variant: code list, SCD dimension with provenance, equity views."""
+    """Builds the aware variant: distinct code domains, Type-2-style dimension with provenance, equity views."""
     nhts2017.ingest(root=lake_root)
     summary = build_module.build("aware", root=lake_root)
     assert summary["r_coverage"] == ["R1", "R2", "R3", "R6", "R7", "R8", "R9", "R11"]
-    assert _lake_query(lake_root, "select count(*) from lake.aware.dim_sex_code")[0][0] == 6
+    assert _lake_query(lake_root, "select count(*) from lake.aware.dim_sex_code")[0][0] == 5
+    assert _lake_query(lake_root, "select count(*) from lake.aware.dim_gender_identity_code")[0][0] == 5
+    # Sex and gender identity stay distinct domains: no gender concept in the sex list, and
+    # extension rows never claim a standard source (ADR-0006)
+    sex_codes = {row[0] for row in _lake_query(lake_root, "select sex_code from lake.aware.dim_sex_code")}
+    assert "X" not in sex_codes
+    mislabelled = _lake_query(
+        lake_root,
+        "select count(*) from lake.aware.dim_sex_code where is_extension and source_standard like '%ISO%'",
+    )[0][0]
+    assert mislabelled == 0
+    # NHTS 2017 collects no gender identity: the attribute exhibits non-collection by construction
+    assert _lake_query(lake_root, "select distinct gender_identity_code from lake.aware.dim_person_sex") == [("NC",)]
     sources = dict(_lake_query(lake_root, "select sex_source, count(*) from lake.aware.dim_person_sex group by 1"))
     assert sources == {"reported": 2, "imputed": 1}
     imputation = dict(_lake_query(lake_root, "select sex_source, persons from lake.aware.v_sex_imputation_share"))

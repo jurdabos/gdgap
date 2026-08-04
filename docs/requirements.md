@@ -15,7 +15,7 @@ Corpus streams: disaggregation mandates (SAGER — Heidari et al., 2016; UN Wome
 
 - Requirement: The conceptual and logical model gives sex and gender distinct, explicitly defined attributes, used carefully per SAGER's terminology discipline; the physical schema must not fold them into a single binary, default-male column.
 - Sources: Heidari et al. (2016); forward-engaged in 4.2 via McClure et al. (2022).
-- Design hook (4.2): aware-variant dimension with separately defined sex/gender attributes; the blind variant embodies the conflation for contrast.
+- Design hook (4.2): separate governed code domains — `dim_sex_code` (ISO/IEC 5218 core plus the `U` application extension) and `dim_gender_identity_code` (Stats NZ-anchored) — joined to the person dimension as distinct `sex_code` and `gender_identity_code` attributes; NHTS 2017 supplies only sex, so `gender_identity_code` reads `NC` (not collected) by construction, exhibiting the instrument's gap (ADR-0006); the blind variant embodies the conflation for contrast.
 - Evidence: DDL header grep (appendix A); 5.1 side-by-side query results.
 
 ## R2 — Person-level facts are disaggregable by sex at every analysis grain
@@ -50,7 +50,7 @@ Corpus streams: disaggregation mandates (SAGER — Heidari et al., 2016; UN Wome
 
 - Requirement: The physical code list implements a published standard and remains extensible beyond the binary — representation for identities outside male/female and for explicit undisclosed states must be possible by governed extension, not ad-hoc schema surgery.
 - Sources: D'Ignazio & Klein (2020) — rethink binaries and hierarchies; Stats NZ (2024) as the production governance exemplar; ISO/IEC 5218 implemented-then-extended in 4.2.
-- Design hook (4.2): code-list table with standard codes, extension rows, and constraints.
+- Design hook (4.2): code-list tables (sex; gender identity) with standard cores and flagged extension rows — local rows are governed application extensions, never additional standard codes (ADR-0006).
 - Evidence: DDL; 5.2 code-list fit against the population (unknown/other shares).
 
 ## R7 — Nonresponse and unknown are meaningful values, never conflated with NULL

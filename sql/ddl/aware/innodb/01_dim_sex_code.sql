@@ -1,5 +1,5 @@
--- R1, R6: ISO/IEC 5218:2022 code list, InnoDB foil — structure only; the standard core and the
--- flagged extension rows are copied from the built lake variant by the build.
+-- R1, R6: ISO/IEC 5218:2022 sex code list, InnoDB foil — structure only; the standard core plus the
+-- 'U' application extension are copied from the built lake variant; gender identity has its own domain (R1).
 CREATE DATABASE IF NOT EXISTS gdgap_aware;
 DROP TABLE IF EXISTS gdgap_aware.dim_sex_code;
 CREATE TABLE gdgap_aware.dim_sex_code (
