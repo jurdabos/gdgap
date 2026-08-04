@@ -1,7 +1,9 @@
--- R1, R3, R8: sex/gender as a first-class SCD-2 dimension; the sex_source provenance column
--- records reported-vs-imputed (R3), sex_code_reported keeps the pre-imputation state exhibitable,
--- and validity intervals make the attribute time-variant (R8). Initial load opens the interval at
--- the survey period start; a later change of recorded gender closes it and appends a new row.
+-- R1, R3, R8: sex/gender as a first-class Type-2-style (validity-interval) dimension; the sex_source
+-- provenance column records reported-vs-imputed (R3), sex_code_reported keeps the pre-imputation state
+-- exhibitable, and validity intervals make the attribute time-variant (R8). Initial load opens the
+-- interval at the survey period start; a change of recorded gender would close it and append a new row.
+-- Facts carry no dimension-version key; analytical views join the natural key plus is_current, so
+-- reporting is by current recorded identity — a deliberate choice recorded in ADR-0005.
 CREATE SCHEMA IF NOT EXISTS lake.aware;
 DROP TABLE IF EXISTS lake.aware.dim_person_sex;
 CREATE TABLE lake.aware.dim_person_sex AS

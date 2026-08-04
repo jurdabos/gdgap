@@ -64,8 +64,9 @@ Corpus streams: disaggregation mandates (SAGER — Heidari et al., 2016; UN Wome
 
 - Requirement: The aware dimension handles mutability with slowly-changing-dimension mechanics (validity intervals), so a change of recorded gender neither destroys history nor misattributes past facts.
 - Sources: D'Ignazio & Klein (2020); Finlay-Smits et al. (2024) — responsiveness; SCD mechanics per Kimball & Ross in 4.2.
-- Design hook (4.2): SCD-typed sex/gender dimension in the aware variant.
+- Design hook (4.2): Type-2-style (validity-interval) sex/gender dimension in the aware variant.
 - Evidence: DDL; 5.2 complexity delta names the cost of carrying it.
+- Scope note: the artefact demonstrates SCD mechanics and history retention; the analytical views deliberately report by current recorded identity (natural person key plus `is_current`, the facts carry no dimension-version key — ADR-0005 records the choice), and richer attribution semantics remain future work.
 
 ## R9 — Disaggregation must not create exposure: minimisation and small-cell discipline
 

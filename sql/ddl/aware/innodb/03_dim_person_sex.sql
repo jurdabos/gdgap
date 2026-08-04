@@ -1,5 +1,5 @@
--- R1, R3, R8: SCD-2 sex dimension, InnoDB foil — sex_source provenance (R3) and validity intervals
--- (R8) in row-oriented storage with the SCD grain enforced by the primary key; data copied from the lake.
+-- R1, R3, R8: Type-2-style sex dimension, InnoDB foil — sex_source provenance (R3) and validity intervals
+-- (R8) in row-oriented storage with the versioned grain enforced by the primary key; data copied from the lake.
 CREATE DATABASE IF NOT EXISTS gdgap_aware;
 DROP TABLE IF EXISTS gdgap_aware.dim_person_sex;
 CREATE TABLE gdgap_aware.dim_person_sex (
