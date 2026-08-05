@@ -205,6 +205,12 @@ def ingest(root: Path | None = None, force: bool = False) -> list[dict]:
         click.echo(f"✓ Lake at snapshot {snapshot} — audit trail: select * from lake.snapshots()")
     _append_csv(root / INGEST_LOG, ["ts_utc", "dataset", "table", "action", "rows", "sha256"], log_rows)
     click.echo(f"✓ Row counts recorded in {INGEST_LOG.as_posix()}")
+    # R13 control (ADR-0009): comparing the fresh lake state with the declared data-quality
+    # spec; imported lazily to keep module import light and cycle-free
+    from gdgap.quality import spec_path, validate
+
+    if spec_path(root, DATASET).is_file():
+        validate(dataset=DATASET, stage="ingest", root=root)
     return log_rows
 
 

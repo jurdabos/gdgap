@@ -119,4 +119,13 @@ def build(variant: str, backend_name: str = "ducklake", root: Path | None = None
         finally:
             backend.close()
     click.echo(f"✓ Built {variant} on {backend_name} — {len(files)} DDL file(s), R-coverage: {', '.join(covered)}")
+    if variant == "aware":
+        # R13 control (ADR-0009): the aware warehouse — including the InnoDB mirror migration —
+        # must conform to every registered data-quality spec; the blind variant is exempt because
+        # it violates the design requirements deliberately (docs/requirements.md conventions).
+        # Importing lazily to keep module import light and cycle-free.
+        from gdgap.quality import datasets_with_specs, validate
+
+        for dataset in datasets_with_specs(root):
+            validate(dataset=dataset, stage="aware_build", backend_name=backend_name, root=root)
     return {"variant": variant, "backend": backend_name, "files": [path.name for path in files], "r_coverage": covered}

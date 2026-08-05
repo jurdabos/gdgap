@@ -1,4 +1,4 @@
-# Requirements registry — R1..R12
+# Requirements registry — R1..R13
 
 This registry converts the advocacy corpus of thesis subchapter 3.3 into numbered, engineer-inspectable requirements the artefact must satisfy. It is simultaneously the DSR "define requirements" activity (Johannesson & Perjons; see thesis 3.1), and it is the traceability spine of the project: 4.2 designs against these R-numbers, ch. 5 measures against them, and 6.1 audits each as satisfied/partial/unmet.
 
@@ -96,6 +96,13 @@ Corpus streams: disaggregation mandates (SAGER — Heidari et al., 2016; UN Wome
 - Design hook: this registry, the DDL header contract, and the `docs/adr/` trail.
 - Evidence: header grep coverage; ADR sequence; 6.1 audit table mapping R1..R12 to ch. 5 evidence.
 
+## R13 — Equity-critical data conforms to an executable, use-specific specification
+
+- Requirement: Each registered dataset containing (or expected to contain) sex/gender information carries a machine-readable data-quality specification derived from its declared uses and the applicable R-requirements; ingest and aware-build runs compare actual data and processing outputs with that specification and append a rule-level conformance log. At minimum the rules separately test required-field/type preservation, raw and governed code membership, meaningful missingness, mapping coverage, provenance coverage, key/referential integrity, and continued disaggregability at the declared fact grains; error-severity nonconformities fail the run, warnings stay visible in the log.
+- Sources: King & Schwarzenbach (2020) — migration/transformation as general quality-risk points and the specification → monitoring/control mechanism; the gender-sensitive rule content is determined by R1, R3, R6, R7, R9, and R12 with their advocacy/standards sources, not by King & Schwarzenbach.
+- Design hook (4.2): `datasets/nhts2017/DATA_QUALITY_SPEC.json` — purpose/syntax/semantics/pragmatics declarations plus executable rules with stable `DQ-*` IDs — run by `gdgap validate nhts2017`, automatically after ingest and after every aware build on either backend (ADR-0009). Loss is operationalised as attribute omission, response-state collapse, sex/gender conflation, provenance loss, grain detachment, or lost disaggregability — not merely corrupted cells; the blind variant stays exempt per the conventions above.
+- Evidence: `results/quality/nhts2017/conformance.csv` (run id, snapshot, commit, stage, backend, rule ID, R-ID, expected, observed, severity, pass/fail, evidence pointer); integration tests cover passing fixtures and intentional failures.
+
 ## Parked corpus extensions
 
-Garzcarek & Steuer (2019) and Regulation (EU) 2024/1689 are parked: they may harden R9 (exposure) and R11 (professional duty) if the corresponding thesis paragraphs demand it. Additions append as R13+ per the conventions above.
+Garzcarek & Steuer (2019) and Regulation (EU) 2024/1689 are parked: they may harden R9 (exposure) and R11 (professional duty) if the corresponding thesis paragraphs demand it. Additions append as R14+ per the conventions above.

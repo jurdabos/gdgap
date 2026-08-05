@@ -1,0 +1,340 @@
+{
+  "dataset": "nhts2017",
+  "spec_version": 1,
+  "derived_from": "docs/requirements.md R13 (mechanism: King & Schwarzenbach 2020); rule content per R1/R2/R3/R6/R7/R8/R9 and their sources (ADR-0009)",
+  "purpose": {
+    "supported_queries": [
+      "q_agn_01_care_trip_share_total",
+      "q_agn_02_mode_share",
+      "q_eq_01_care_trip_share_by_sex",
+      "q_eq_02_ppr"
+    ],
+    "intended_use": "Thesis ch. 4/5 equity analysis of 2017 NHTS travel behaviour; analyst/research use, not operational decision-making.",
+    "data_subjects": "US household travel survey respondents (persons and their trips), weighted to population via WTPERFIN/WTTRDFIN.",
+    "limitations": "Stakeholder needs are literature-derived (the advocacy corpus behind R1..R12), not directly elicited; NHTS 2017 collects sex only, so gender identity is represented by the governed 'NC' (not collected) state, never invented."
+  },
+  "syntax": {
+    "required_columns": {
+      "perpub": ["HOUSEID", "PERSONID", "R_SEX", "R_SEX_IMP", "WTPERFIN"],
+      "trippub": ["HOUSEID", "PERSONID", "WHYTO", "WHYFROM", "WTTRDFIN"]
+    },
+    "sex_column_types": {"R_SEX": "VARCHAR", "R_SEX_IMP": "VARCHAR"},
+    "allowed_raw_sex_codes": ["01", "02", "-7", "-8", "-9"],
+    "allowed_imputed_sex_codes": ["01", "02"],
+    "zero_padding": "Reported male/female arrive zero-padded ('01'/'02'); unpadded '1'/'2' breach the domain — a preserved string with changed meaning is a loss.",
+    "nullability": "R_SEX/R_SEX_IMP are never NULL; nonresponse is carried by reserve codes, not by missingness."
+  },
+  "semantics": {
+    "sex_vs_gender": "Sex (ISO/IEC 5218:2022 core plus the 'U' application extension) and gender identity (Stats NZ core plus 'U'/'NC' extensions) are distinct governed domains; folding them together is a conformance failure (ADR-0006).",
+    "governed_sex_codes": ["0", "1", "2", "9", "U"],
+    "governed_gender_identity_codes": ["1", "2", "3", "U", "NC"],
+    "raw_to_governed": "Every observed raw code maps through map_nhts_sex; refusal (-7) stays distinguishable from ignorance (-8/-9), and nothing coerces to NULL (ADR-0007).",
+    "provenance": "sex_source is one of reported/imputed/edited; reserve-coded rows carry 'imputed' by construction.",
+    "not_collected": "gender_identity_code is 'NC' for every person: the instrument's non-collection stays exhibited and queryable, never backfilled."
+  },
+  "pragmatics": {
+    "must_remain_expressible": ["sql/bench/q_eq_01_care_trip_share_by_sex.sql", "sql/bench/q_eq_02_ppr.sql"],
+    "weights": "Person-level measures require WTPERFIN, trip-level measures WTTRDFIN.",
+    "attribution": "Reporting is by current recorded identity (natural key plus is_current; ADR-0005).",
+    "suppression": "Equity outputs suppress cells below n = 30 (R9).",
+    "known_limitations": "NHTS 2017 does not collect gender identity; accuracy, representativeness, ethics, and population fit are assessed via R10 (Venus) and the datasheet, not machine-verified here."
+  },
+  "rules": [
+    {
+      "rule_id": "DQ-SYN-01",
+      "r_id": "R7",
+      "stage": "ingest",
+      "severity": "error",
+      "backends": ["ducklake"],
+      "description": "R_SEX and R_SEX_IMP survive ingest as declared VARCHAR (schema-on-write contract), never numerics.",
+      "check": {
+        "type": "sql_scalar",
+        "sql": "select count(*) from (select * from (describe {schema}.perpub)) t where column_name in ('R_SEX', 'R_SEX_IMP') and column_type = 'VARCHAR'",
+        "op": "eq",
+        "expected": 2
+      },
+      "evidence": "results/profile/nhts2017/perpub_structure.csv"
+    },
+    {
+      "rule_id": "DQ-SYN-02",
+      "r_id": "R7",
+      "stage": "ingest",
+      "severity": "error",
+      "backends": ["ducklake"],
+      "description": "Meaningful missingness: no NULLs in the sex columns — nonresponse is coded, never blank.",
+      "check": {
+        "type": "sql_scalar",
+        "sql": "select count(*) from {schema}.perpub where R_SEX is null or R_SEX_IMP is null",
+        "op": "eq",
+        "expected": 0
+      },
+      "evidence": "results/profile/nhts2017/perpub_nulls.csv"
+    },
+    {
+      "rule_id": "DQ-SYN-03",
+      "r_id": "R7",
+      "stage": "ingest",
+      "severity": "error",
+      "backends": ["ducklake"],
+      "description": "Raw code membership incl. zero-padding: R_SEX within the declared domain, R_SEX_IMP resolved to 01/02.",
+      "check": {
+        "type": "sql_scalar",
+        "sql": "select count(*) from {schema}.perpub where R_SEX not in ('01', '02', '-7', '-8', '-9') or R_SEX_IMP not in ('01', '02')",
+        "op": "eq",
+        "expected": 0
+      },
+      "evidence": "results/profile/nhts2017/perpub_sex_codelist.csv"
+    },
+    {
+      "rule_id": "DQ-SYN-04",
+      "r_id": "R2",
+      "stage": "ingest",
+      "severity": "error",
+      "backends": ["ducklake"],
+      "description": "Grain and weight columns present: person and trip grains keep their keys and survey weights.",
+      "check": {
+        "type": "sql_scalar",
+        "sql": "select (select count(*) from (select * from (describe {schema}.perpub)) t where column_name in ('HOUSEID', 'PERSONID', 'WTPERFIN')) + (select count(*) from (select * from (describe {schema}.trippub)) t2 where column_name in ('HOUSEID', 'PERSONID', 'WHYTO', 'WHYFROM', 'WTTRDFIN'))",
+        "op": "eq",
+        "expected": 8
+      },
+      "evidence": "results/profile/nhts2017/perpub_structure.csv; results/profile/nhts2017/trippub_structure.csv"
+    },
+    {
+      "rule_id": "DQ-SYN-05",
+      "r_id": "R8",
+      "stage": "aware_build",
+      "severity": "error",
+      "backends": ["ducklake", "innodb"],
+      "description": "Current-dimension key integrity: at most one current row per (houseid, personid).",
+      "check": {
+        "type": "sql_scalar",
+        "sql": "select count(*) from (select houseid, personid from {schema}.dim_person_sex where is_current group by houseid, personid having count(*) > 1) t",
+        "op": "eq",
+        "expected": 0
+      },
+      "evidence": "sql/ddl/aware/04_dim_person_sex.sql"
+    },
+    {
+      "rule_id": "DQ-SYN-06",
+      "r_id": "R2",
+      "stage": "aware_build",
+      "severity": "error",
+      "backends": ["ducklake", "innodb"],
+      "description": "No grain detachment: every person fact joins a current dimension row.",
+      "check": {
+        "type": "sql_scalar",
+        "sql": "select count(*) from {schema}.fact_person f where not exists (select 1 from {schema}.dim_person_sex d where d.houseid = f.houseid and d.personid = f.personid and d.is_current)",
+        "op": "eq",
+        "expected": 0
+      },
+      "evidence": "sql/ddl/aware/05_fact_person.sql"
+    },
+    {
+      "rule_id": "DQ-SYN-07",
+      "r_id": "R2",
+      "stage": "aware_build",
+      "severity": "error",
+      "backends": ["ducklake", "innodb"],
+      "description": "No grain detachment: every trip fact joins a current dimension row.",
+      "check": {
+        "type": "sql_scalar",
+        "sql": "select count(*) from {schema}.fact_trip f where not exists (select 1 from {schema}.dim_person_sex d where d.houseid = f.houseid and d.personid = f.personid and d.is_current)",
+        "op": "eq",
+        "expected": 0
+      },
+      "evidence": "sql/ddl/aware/06_fact_trip.sql"
+    },
+    {
+      "rule_id": "DQ-SEM-01",
+      "r_id": "R6",
+      "stage": "aware_build",
+      "severity": "error",
+      "backends": ["ducklake", "innodb"],
+      "description": "Governed sex code list complete: the ISO/IEC 5218 core plus 'U' are all present.",
+      "check": {
+        "type": "sql_scalar",
+        "sql": "select count(*) from {schema}.dim_sex_code where sex_code in ('0', '1', '2', '9', 'U')",
+        "op": "eq",
+        "expected": 5
+      },
+      "evidence": "sql/ddl/aware/01_dim_sex_code.sql"
+    },
+    {
+      "rule_id": "DQ-SEM-02",
+      "r_id": "R6",
+      "stage": "aware_build",
+      "severity": "error",
+      "backends": ["ducklake", "innodb"],
+      "description": "No rogue sex codes and no extension row claiming an ISO source (governed extension discipline).",
+      "check": {
+        "type": "sql_scalar",
+        "sql": "select count(*) from {schema}.dim_sex_code where sex_code not in ('0', '1', '2', '9', 'U') or (is_extension and source_standard like '%ISO%')",
+        "op": "eq",
+        "expected": 0
+      },
+      "evidence": "sql/ddl/aware/01_dim_sex_code.sql"
+    },
+    {
+      "rule_id": "DQ-SEM-03",
+      "r_id": "R1",
+      "stage": "aware_build",
+      "severity": "error",
+      "backends": ["ducklake", "innodb"],
+      "description": "Governed gender-identity code list complete: the Stats NZ core plus 'U' and 'NC' are all present.",
+      "check": {
+        "type": "sql_scalar",
+        "sql": "select count(*) from {schema}.dim_gender_identity_code where gender_identity_code in ('1', '2', '3', 'U', 'NC')",
+        "op": "eq",
+        "expected": 5
+      },
+      "evidence": "sql/ddl/aware/02_dim_gender_identity_code.sql"
+    },
+    {
+      "rule_id": "DQ-SEM-04",
+      "r_id": "R6",
+      "stage": "aware_build",
+      "severity": "error",
+      "backends": ["ducklake", "innodb"],
+      "description": "No rogue gender-identity codes and no extension row claiming a standard source.",
+      "check": {
+        "type": "sql_scalar",
+        "sql": "select count(*) from {schema}.dim_gender_identity_code where gender_identity_code not in ('1', '2', '3', 'U', 'NC') or (is_extension and (source_standard like '%ISO%' or source_standard like '%Stats NZ%'))",
+        "op": "eq",
+        "expected": 0
+      },
+      "evidence": "sql/ddl/aware/02_dim_gender_identity_code.sql"
+    },
+    {
+      "rule_id": "DQ-SEM-05",
+      "r_id": "R7",
+      "stage": "aware_build",
+      "severity": "error",
+      "backends": ["ducklake", "innodb"],
+      "description": "Mapping coverage: every observed raw code in the dimension maps through map_nhts_sex.",
+      "check": {
+        "type": "sql_scalar",
+        "sql": "select count(*) from {schema}.dim_person_sex d where not exists (select 1 from {schema}.map_nhts_sex m where m.nhts_code = d.r_sex_raw)",
+        "op": "eq",
+        "expected": 0
+      },
+      "evidence": "sql/ddl/aware/03_map_nhts_sex.sql"
+    },
+    {
+      "rule_id": "DQ-SEM-06",
+      "r_id": "R3",
+      "stage": "aware_build",
+      "severity": "error",
+      "backends": ["ducklake", "innodb"],
+      "description": "Provenance coverage: sex_source present and within {reported, imputed, edited} for every row.",
+      "check": {
+        "type": "sql_scalar",
+        "sql": "select count(*) from {schema}.dim_person_sex where sex_source is null or sex_source not in ('reported', 'imputed', 'edited')",
+        "op": "eq",
+        "expected": 0
+      },
+      "evidence": "sql/ddl/aware/04_dim_person_sex.sql"
+    },
+    {
+      "rule_id": "DQ-SEM-07",
+      "r_id": "R7",
+      "stage": "aware_build",
+      "severity": "error",
+      "backends": ["ducklake", "innodb"],
+      "description": "Response-state semantics preserved: reserve-coded rows carry 'imputed' provenance (ADR-0007).",
+      "check": {
+        "type": "sql_scalar",
+        "sql": "select count(*) from {schema}.dim_person_sex where r_sex_raw in ('-7', '-8', '-9') and sex_source <> 'imputed'",
+        "op": "eq",
+        "expected": 0
+      },
+      "evidence": "docs/adr/0007-response-state-granularity.md"
+    },
+    {
+      "rule_id": "DQ-SEM-08",
+      "r_id": "R1",
+      "stage": "aware_build",
+      "severity": "error",
+      "backends": ["ducklake", "innodb"],
+      "description": "Non-collection stays exhibited: gender_identity_code is 'NC' for every person, never NULL or invented.",
+      "check": {
+        "type": "sql_scalar",
+        "sql": "select count(*) from {schema}.dim_person_sex where gender_identity_code is null or gender_identity_code <> 'NC'",
+        "op": "eq",
+        "expected": 0
+      },
+      "evidence": "docs/adr/0006-sex-gender-domain-separation.md"
+    },
+    {
+      "rule_id": "DQ-SEM-09",
+      "r_id": "R7",
+      "stage": "aware_build",
+      "severity": "warning",
+      "backends": ["ducklake", "innodb"],
+      "description": "Drift monitor: governed map codes that the data never exhibits (expected red on NHTS 2017: '-9' is declared but unobserved).",
+      "check": {
+        "type": "sql_scalar",
+        "sql": "select count(*) from {schema}.map_nhts_sex m where not exists (select 1 from {schema}.dim_person_sex d where d.r_sex_raw = m.nhts_code)",
+        "op": "eq",
+        "expected": 0
+      },
+      "evidence": "results/profile/nhts2017/perpub_sex_codelist.csv"
+    },
+    {
+      "rule_id": "DQ-PRAG-01",
+      "r_id": "R2",
+      "stage": "aware_build",
+      "severity": "error",
+      "backends": ["ducklake", "innodb"],
+      "description": "Disaggregability: the care-trip-share-by-sex equity query stays expressible as plain SQL.",
+      "check": {
+        "type": "sql_executes",
+        "sql_file": "sql/bench/q_eq_01_care_trip_share_by_sex.sql"
+      },
+      "evidence": "sql/bench/q_eq_01_care_trip_share_by_sex.sql"
+    },
+    {
+      "rule_id": "DQ-PRAG-02",
+      "r_id": "R2",
+      "stage": "aware_build",
+      "severity": "error",
+      "backends": ["ducklake", "innodb"],
+      "description": "Disaggregability: the PPR equity query stays expressible as plain SQL.",
+      "check": {
+        "type": "sql_executes",
+        "sql_file": "sql/bench/q_eq_02_ppr.sql"
+      },
+      "evidence": "sql/bench/q_eq_02_ppr.sql"
+    },
+    {
+      "rule_id": "DQ-PRAG-03",
+      "r_id": "R9",
+      "stage": "aware_build",
+      "severity": "error",
+      "backends": ["ducklake", "innodb"],
+      "description": "Suppression discipline: no equity view emits a cell below the n = 30 threshold.",
+      "check": {
+        "type": "sql_scalar",
+        "sql": "select (select count(*) from {schema}.v_care_trip_share_by_sex where trips_n < 30) + (select count(*) from {schema}.v_ppr where persons_n < 30 or care_trips_n < 30)",
+        "op": "eq",
+        "expected": 0
+      },
+      "evidence": "sql/ddl/aware/07_v_equity_measures.sql"
+    },
+    {
+      "rule_id": "DQ-PRAG-04",
+      "r_id": "R3",
+      "stage": "ingest",
+      "severity": "warning",
+      "backends": ["ducklake"],
+      "description": "Plausibility tripwire: more than half of persons imputed would signal an instrument or pipeline defect.",
+      "check": {
+        "type": "sql_scalar",
+        "sql": "select 100.0 * count(case when R_SEX <> R_SEX_IMP then 1 end) / count(*) from {schema}.perpub",
+        "op": "lte",
+        "expected": 50.0
+      },
+      "evidence": "results/profile/nhts2017/perpub_sex_imputation_share.csv"
+    }
+  ]
+}

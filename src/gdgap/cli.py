@@ -461,6 +461,36 @@ def bench_cmd(
     )
 
 
+@cli.command("validate")
+@click.argument("dataset", default="nhts2017", required=False)
+@click.option(
+    "--stage",
+    type=click.Choice(["ingest", "aware-build", "all"]),
+    default="all",
+    show_default=True,
+    help="Pipeline stage(s) to validate",
+)
+@click.option(
+    "--backend",
+    type=click.Choice(["ducklake", "innodb"]),
+    default="ducklake",
+    show_default=True,
+    help="Backend to validate (ingest rules run on the lake only)",
+)
+def validate_cmd(dataset: str, stage: str, backend: str) -> None:
+    """Runs the R13 data-quality contract and appends rule-level conformance evidence (ADR-0009)."""
+    # Importing lazily so push invocations skip the duckdb import
+    from gdgap.quality import validate
+
+    stages = {"ingest": ["ingest"], "aware-build": ["aware_build"], "all": ["ingest", "aware_build"]}[stage]
+    if backend == "innodb":
+        stages = [item for item in stages if item != "ingest"]
+        if not stages:
+            raise click.BadParameter("the ingest stage validates the lake — use --backend ducklake")
+    for item in stages:
+        validate(dataset=dataset, stage=item, backend_name=backend)
+
+
 @cli.command("mysql-doctor")
 @click.option("--json", "as_json", is_flag=True, help="Emit the sanitized facts as JSON")
 def mysql_doctor_cmd(as_json: bool) -> None:

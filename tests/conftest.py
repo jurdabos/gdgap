@@ -63,6 +63,8 @@ def lake_root(tmp_path: Path) -> Path:
     meta = tmp_path / "datasets" / "nhts2017"
     meta.mkdir(parents=True)
     (meta / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    # Shipping the R13 data-quality spec so ingest/build auto-validation exercises the real contract
+    shutil.copy(REPO_ROOT / "datasets" / "nhts2017" / "DATA_QUALITY_SPEC.json", meta / "DATA_QUALITY_SPEC.json")
     # Shipping the real DDL tree, bench catalogue, and requirements registry so builds, the R-gate,
     # and the bench harness all run against the canon
     shutil.copytree(REPO_ROOT / "sql" / "ddl", tmp_path / "sql" / "ddl")
