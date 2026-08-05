@@ -5,6 +5,7 @@ Provides the ``push`` subcommand that automates the git commit-and-push
 workflow, including pre-commit hook retry logic and optional DVC integration.
 """
 
+import json
 import shutil
 import subprocess
 import tomllib
@@ -458,6 +459,28 @@ def bench_cmd(
         seed=seed,
         skip_storage=skip_storage,
     )
+
+
+@cli.command("mysql-doctor")
+@click.option("--json", "as_json", is_flag=True, help="Emit the sanitized facts as JSON")
+def mysql_doctor_cmd(as_json: bool) -> None:
+    """Diagnoses MySQL connectivity with sanitized output — never credentials or the full URL (ADR-0008)."""
+    # Importing lazily so push invocations skip the duckdb import
+    from gdgap.bench.backends.innodb import diagnose
+    from gdgap.ingest.nhts2017 import find_root
+
+    facts = diagnose(find_root())
+    if as_json:
+        click.echo(json.dumps(facts, indent=2, sort_keys=True))
+    else:
+        click.echo(f"Configured endpoint: {facts['configured_endpoint'] or 'not configured'}")
+        click.echo(f"TCP reachable: {'yes' if facts['tcp_reachable'] else 'no'}")
+        click.echo(f"MySQL authentication: {'yes' if facts['auth_ok'] else 'no'}")
+        click.echo(f"MySQL version: {facts['server_version'] or 'n/a'}")
+        if facts["error"]:
+            click.echo(f"Error: {facts['error']}")
+    if facts["error"]:
+        raise SystemExit(1)
 
 
 def main() -> None:

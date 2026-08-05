@@ -6,8 +6,14 @@ import shutil
 from pathlib import Path
 
 import pytest
+from dotenv import load_dotenv
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+
+# Loading the root .env before test modules are imported, so the requires_mysql markers
+# (evaluated from os.environ at import time) unskip without a shell export; override=False
+# keeps deliberate shell exports authoritative (ADR-0008)
+load_dotenv(REPO_ROOT / ".env", override=False)
 
 ATTACH_SQL = """INSTALL ducklake;
 ATTACH 'ducklake:catalog/gdgap.ducklake' AS lake (DATA_PATH 'data/lake/');

@@ -196,11 +196,16 @@ def _engine_settings(backend) -> dict:
         }
     # threads/memory_limit are DuckDB control names; faking them for MySQL would invent a common setting
     pool = backend.fetchall("show variables like 'innodb_buffer_pool_size'")
+    native = {name: str(value) for name, value in pool}
+    # Recording sanitized transport provenance (ADR-0008): container-loopback and
+    # remote-host runs would otherwise look identical in the evidence
+    native["mysql_host"] = str(getattr(backend, "host", ""))
+    native["mysql_port"] = str(getattr(backend, "port", ""))
     return {
         "engine_version": f"mysql {version}",
         "threads": "",
         "memory_limit_bytes": "",
-        "native": {name: str(value) for name, value in pool},
+        "native": native,
     }
 
 

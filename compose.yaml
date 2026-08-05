@@ -1,0 +1,25 @@
+# The InnoDB foil's MySQL server (ADR-0008): compose-managed, loopback-only, LTS-pinned.
+# The datadir persists in the named volume gdgap_mysql_data (ext4-native I/O) — never a
+# /mnt/* bind mount, which would run the row store on 9p and poison timing evidence.
+# Durable artefacts are the committed DDL, scripts/dump_mysql.sh exports, and results/.
+services:
+  mysql:
+    image: mysql:8.4.11
+    container_name: gdgap-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${GDGAP_MYSQL_ROOT_PASSWORD:?set GDGAP_MYSQL_ROOT_PASSWORD in .env}
+    ports:
+      # Binding 3307 to stay clear of any Windows-side MySQL that localhost forwarding might expose on 3306
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      # Pinging authenticated: a plain mysqladmin ping reports alive even on access-denied
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_ROOT_PASSWORD\" mysqladmin ping -h 127.0.0.1 --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+volumes:
+  mysql_data:

@@ -87,3 +87,26 @@ def test_parse_memory_bytes_units():
     assert bench_run._parse_memory_bytes("8GB") == 8_000_000_000
     assert bench_run._parse_memory_bytes("8.0 GiB") == 8 * 1024**3
     assert bench_run._parse_memory_bytes("512") == 512
+
+
+class _FakeInnodbBackend:
+    """Duck-typed InnodbBackend stand-in answering only the settings queries."""
+
+    name = "innodb"
+    host = "127.0.0.1"
+    port = 3307
+
+    def fetchall(self, sql: str) -> list[tuple]:
+        """Returns canned rows for the version and buffer-pool queries."""
+        if "version()" in sql:
+            return [("8.4.11",)]
+        return [("innodb_buffer_pool_size", 134217728)]
+
+
+def test_engine_settings_record_sanitized_mysql_transport():
+    """Persists mysql host/port (never credentials) alongside the buffer pool for envinfo (ADR-0008)."""
+    settings = bench_run._engine_settings(_FakeInnodbBackend())
+    assert settings["engine_version"] == "mysql 8.4.11"
+    assert settings["native"]["mysql_host"] == "127.0.0.1"
+    assert settings["native"]["mysql_port"] == "3307"
+    assert settings["native"]["innodb_buffer_pool_size"] == "134217728"
