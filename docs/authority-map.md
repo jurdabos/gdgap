@@ -4,7 +4,7 @@ For every kind of knowledge in this project, exactly one source is authoritative
 
 ## Bibliographic metadata
 
-- Authoritative: the Zotero library.
+- Authoritative: cloud-synced Zotero library.
 - Derived: the exports in the thesis workspace (`lit/THESIS.bib`, `lit/THESIS.json` CSL export, `lit/dbengines.bib`) and the Word bibliography inside the thesis document — all regenerated from Zotero, never patched by hand.
 
 ## Claims
@@ -25,7 +25,7 @@ For every kind of knowledge in this project, exactly one source is authoritative
 ## Behaviour
 
 - Authoritative: versioned code (`src/gdgap/`), schemas and query catalogue (`sql/ddl/`, `sql/bench/`), and tests (`tests/`), pinned by `uv.lock`/`.python-version` and checked in CI.
-- Secondary: README and other prose explain behaviour but do not override it; when prose and code disagree, code wins and the prose is corrected.
+- Secondary: README and other prose explain behaviour but do not override it; when repo prose and code disagree, code wins and the prose is corrected.
 
 ## Data semantics
 
@@ -39,4 +39,4 @@ For every kind of knowledge in this project, exactly one source is authoritative
 
 ## Submitted argument
 
-- The thesis `.docx` is authoritative for the argument — and only for the argument. It cannot override code behaviour, schemas, or source documentation; where prose and artefact diverge, the artefact wins and the prose is corrected (worked example: the containerisation-scope overstatement, resolved by ADR-0010).
+- The thesis `.docx` is authoritative for the argument. It shall not be taken to override code behaviour, schemas, or source documentation.
