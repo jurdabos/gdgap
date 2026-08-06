@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
+title: "gdgap: gender-blind vs. gender-aware data warehousing over the 2017 NHTS"
+authors:
+  - family-names: "Torda"
+    given-names: "Balázs"
+    email: "balazs.torda@iu-study.org"
+repository-code: "https://github.com/jurdabos/gdgap"
+license: MIT
+version: 0.1.0
+keywords:
+  - "gender data gap"
+  - "sex-disaggregated data"
+  - "data warehousing"
+  - "data quality"
+  - "DuckDB"
+  - "DuckLake"
+  - "NHTS 2017"
+abstract: >-
+  Design-science artefact contrasting a gender-blind and a gender-aware warehouse
+  variant built from the identical 2017 NHTS source: sex/gender as a first-class,
+  provenance-carrying dimension with validity-interval mutability handling, derived
+  equity measures (care-trip share, PPR) under small-cell suppression, an executable
+  data-quality contract, and a benchmark harness against a containerised InnoDB foil.

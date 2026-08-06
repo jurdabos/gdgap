@@ -6,6 +6,8 @@ build-backend = "hatchling.build"
 name = "gdgap"
 version = "0.1.0"
 description = "A tool related to probe datasets with respect to the gender data gap and build (a) reference architecture(s)"
+authors = [{ name = "Balázs Torda", email = "balazs.torda@iu-study.org" }]
+license = "MIT"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
