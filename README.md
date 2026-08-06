@@ -1,5 +1,10 @@
 # gdgap
 
+The canonical DuckDB/DuckLake engine runs in-process, as embedded engines are designed to;
+only the client–server comparison component (MySQL/InnoDB) is containerised. Reproducibility
+comes from version pins, manifest-verified data, and the executable R13 contract rather than
+an application image (ADR-0010).
+
 ## MySQL foil (containerized)
 
 The InnoDB benchmark foil runs in a compose-managed MySQL 8.4 LTS container (ADR-0008):
