@@ -1,106 +1,106 @@
 # Requirements registry — R1..R13
 
-This registry converts the advocacy corpus of thesis subchapter 3.3 into numbered, engineer-inspectable requirements the artefact must satisfy. It is simultaneously the DSR "define requirements" activity (Johannesson & Perjons; see thesis 3.1), and it is the traceability spine of the project: 4.2 designs against these R-numbers, ch. 5 measures against them, and 6.1 audits each as satisfied/partial/unmet.
+This registry converts the advocacy corpus of thesis subchapter §3.3 into numbered, engineer-inspectable requirements the artefact must satisfy. It is simultaneously the DSR "define requirements" activity (Johannesson & Perjons; see thesis §3.1), and it is the traceability spine of the project: §4.2 designs against these R-numbers, §5 measures against them, and §6.1 audits each as satisfied/partial/unmet.
 
 Corpus streams: disaggregation mandates (SAGER — Heidari et al., 2016; UN Women, 2018; Data2X — Vaitla et al., 2017), stewardship instruments (datasheets — Gebru et al., 2021; FAIR — Wilkinson et al., 2016), data-feminist design principles (D'Ignazio & Klein, 2020; the Manifest-No — Cifor et al., 2019), dataset-quality scoring (the Venus score — Chicco et al., 2025), professional duty (ACM, 2018), and gender-sensitive responsible innovation across all stages (AIRR — Finlay-Smits et al., 2024).
 
 ## Conventions (the traceability contract)
 
 - Registry headings follow `## R<n> — <short name>` exactly; `grep -E '^## R[0-9]+' docs/requirements.md` enumerates the valid IDs.
-- Every DDL file under `sql/ddl/<variant>/` must open with a header comment naming at least one R-number, e.g. `-- R3: provenance column sex_source records reported-vs-imputed` or `-- R2, R7: ...`. The Phase D build command refuses to run a file without one, so appendix A and the 4.2 traceability claim reduce to a grep.
+- Every DDL file under `sql/ddl/<variant>/` must open with a header comment naming at least one R-number, e.g. `-- R3: provenance column sex_source records reported-vs-imputed` or `-- R2, R7: ...`. The Phase D build command refuses to run a file without one, so appendix A and the §4.2 traceability claim reduce to a grep.
 - IDs are stable once cited: new requirements append at the end; retired ones are marked deprecated, never renumbered.
 - The gender-blind build variant deliberately violates the design requirements (R1–R3, R6–R8); the contrast is the experiment, not an oversight.
 
 ## R1 — Sex and gender are distinct, deliberately modelled concepts
 
 - Requirement: The conceptual and logical model gives sex and gender distinct, explicitly defined attributes, used carefully per SAGER's terminology discipline; the physical schema must not fold them into a single binary, default-male column.
-- Sources: Heidari et al. (2016); forward-engaged in 4.2 via McClure et al. (2022).
-- Design hook (4.2): separate governed code domains — `dim_sex_code` (ISO/IEC 5218 core plus the `U` application extension) and `dim_gender_identity_code` (Stats NZ-anchored) — joined to the person dimension as distinct `sex_code` and `gender_identity_code` attributes; NHTS 2017 supplies only sex, so `gender_identity_code` reads `NC` (not collected) by construction, exhibiting the instrument's gap (ADR-0006); the blind variant embodies the conflation for contrast.
-- Evidence: DDL header grep (appendix A); 5.1 side-by-side query results.
+- Sources: Heidari et al. (2016); forward-engaged in §4.2 via McClure et al. (2022).
+- Design hook (§4.2): separate governed code domains — `dim_sex_code` (ISO/IEC 5218 core plus the `U` application extension) and `dim_gender_identity_code` (Stats NZ-anchored) — joined to the person dimension as distinct `sex_code` and `gender_identity_code` attributes; NHTS 2017 supplies only sex, so `gender_identity_code` reads `NC` (not collected) by construction, exhibiting the instrument's gap (ADR-0006); the blind variant embodies the conflation for contrast.
+- Evidence: DDL header grep (appendix A); §5.1 side-by-side query results.
 
 ## R2 — Person-level facts are disaggregable by sex at every analysis grain
 
 - Requirement: Any measure computable from the warehouse is computable disaggregated by sex without schema change — the Q_eq query family must run on the aware build as plain SQL.
 - Sources: Heidari et al. (2016) — disaggregate data by sex or gender whenever feasible; UN Women (2018); Vaitla et al. (2017).
-- Design hook (4.2): sex/gender as a first-class dimension joinable to every fact grain.
-- Evidence: 5.1 — which equity queries the aware build answers that the blind build cannot.
+- Design hook (§4.2): sex/gender as a first-class dimension joinable to every fact grain.
+- Evidence: §5.1 — which equity queries the aware build answers that the blind build cannot.
 
 ## R3 — Provenance of the sex value is first-class (reported vs imputed)
 
-- Requirement: Every stored sex/gender value carries how it was obtained — a `sex_source` provenance column distinguishing reported / imputed / derived / undisclosed — preserving the NHTS `R_SEX` vs `R_SEX_IMP` distinction, with the imputation share queryable at any time.
+- Requirement: Every stored sex/gender value carries how it was obtained — a `sex_source` provenance column distinguishing reported/imputed/derived/undisclosed — preserving the NHTS `R_SEX` vs `R_SEX_IMP` distinction, with the imputation share queryable at any time.
 - Sources: Gebru et al. (2021) — the datasheet's collection/preprocessing provenance questions, pushed down to row level.
-- Design hook (4.2): provenance column in the aware dimension (`-- R3: provenance column sex_source records reported-vs-imputed`).
-- Evidence: profiling pass (imputation share 277/264,234 = 0.1048%); 5.1 imputation-share visibility query.
+- Design hook (§4.2): provenance column in the aware dimension (`-- R3: provenance column sex_source records reported-vs-imputed`).
+- Evidence: profiling pass (imputation share 277/264,234 = 0.1048%); §5.1 imputation-share visibility query.
 
 ## R4 — Every registered dataset ships a datasheet
 
 - Requirement: No dataset enters the lake without `datasets/<ds>/DATASHEET.md` instantiating Gebru et al.'s seven sections, answered from the dataset's authoritative documentation.
 - Sources: Gebru et al. (2021).
 - Design hook: dataset registry plane (`datasets/<ds>/`), populated before ingest.
-- Evidence: `datasets/nhts2017/DATASHEET.md`; 6.1 audit.
+- Evidence: `datasets/nhts2017/DATASHEET.md`; §6.1 audit.
 
 ## R5 — Registered data is FAIR at repository scale
 
 - Requirement: Each dataset carries machine-readable registration metadata — source URL, retrieval date, licence note, per-file SHA-256 and byte size — verified before every ingest (abort on mismatch), plus a documented reproduction path from raw files to lake, so a third party can re-acquire, re-verify, and re-build.
 - Sources: Wilkinson et al. (2016) — findability, accessibility, and reusability via rich provenance metadata; interoperability via the open Parquet/DuckLake formats.
 - Design hook: `manifest.json` + `checksums.txt` + manifest-verified ingest; engine pin in ADR-0001.
-- Evidence: ingest log with per-run digests; 6.1 audit.
+- Evidence: ingest log with per-run digests; §6.1 audit.
 
 ## R6 — The sex/gender code list is standard-based and never binary-closed
 
 - Requirement: The physical code list implements a published standard and remains extensible beyond the binary — representation for identities outside male/female and for explicit undisclosed states must be possible by governed extension, not ad-hoc schema surgery.
-- Sources: D'Ignazio & Klein (2020) — rethink binaries and hierarchies; Stats NZ (2024) as the production governance exemplar; ISO/IEC 5218 implemented-then-extended in 4.2.
-- Design hook (4.2): code-list tables (sex; gender identity) with standard cores and flagged extension rows — local rows are governed application extensions, never additional standard codes (ADR-0006).
-- Evidence: DDL; 5.2 code-list fit against the population (unknown/other shares).
+- Sources: D'Ignazio & Klein (2020) — rethink binaries and hierarchies; Stats NZ (2024) as the production governance exemplar; ISO/IEC 5218 implemented-then-extended in §4.2.
+- Design hook (§4.2): code-list tables (sex; gender identity) with standard cores and flagged extension rows — local rows are governed application extensions, never additional standard codes (ADR-0006).
+- Evidence: DDL; §5.2 code-list fit against the population (unknown/other shares).
 
 ## R7 — Nonresponse and unknown are meaningful values, never conflated with NULL
 
 - Requirement: Reserve codes — prefer not to answer, don't know, not ascertained, appropriate skip — survive ingest, storage, and aggregation as distinct first-class values; no silent coercion to NULL, to a default sex, or to each other; aggregations can always exhibit them.
 - Sources: D'Ignazio & Klein (2020) — embrace pluralism, consider context; Cifor et al. (2019) — refusal carries meaning and must not be erased.
 - Design hook: raw codes preserved verbatim at ingest by a declared `read_csv` type override pinning `R_SEX`/`R_SEX_IMP` to VARCHAR (zero-padding included) rather than leaving the type to sniffer inference; the reserve-code mapping gives each raw state its own row; the analytical dimension retains the reported code verbatim (`r_sex_raw`), so refusal, don't-know, and not-ascertained stay distinguishable in warehouse aggregations even though the ISO analysis domain merges the two ignorance kinds into `0` (ADR-0007).
-- Evidence: profiling structure/codelist CSVs (0 NULL cells, reserve codes intact); `r_sex_raw` in the aware dimension; 5.1 queries exposing the categories.
+- Evidence: profiling structure/codelist CSVs (0 NULL cells, reserve codes intact); `r_sex_raw` in the aware dimension; §5.1 queries exposing the categories.
 
 ## R8 — Gender is time-variant; the model records change
 
 - Requirement: The aware dimension handles mutability with slowly-changing-dimension mechanics (validity intervals), so a change of recorded gender neither destroys history nor misattributes past facts.
-- Sources: D'Ignazio & Klein (2020); Finlay-Smits et al. (2024) — responsiveness; SCD mechanics per Kimball & Ross in 4.2.
-- Design hook (4.2): Type-2-style (validity-interval) sex/gender dimension in the aware variant.
-- Evidence: DDL; 5.2 complexity delta names the cost of carrying it.
+- Sources: D'Ignazio & Klein (2020); Finlay-Smits et al. (2024) — responsiveness; SCD mechanics per Kimball & Ross in §4.2.
+- Design hook (§4.2): Type-2-style (validity-interval) sex/gender dimension in the aware variant.
+- Evidence: DDL; §5.2 complexity delta names the cost of carrying it.
 - Scope note: the artefact demonstrates SCD mechanics and history retention; the analytical views deliberately report by current recorded identity (natural person key plus `is_current`, the facts carry no dimension-version key — ADR-0005 records the choice), and richer attribution semantics remain future work.
 
 ## R9 — Disaggregation must not create exposure: minimisation and small-cell discipline
 
 - Requirement: The artefact carries only attributes with a stated analytical purpose, and every equity output applies a small-cell suppression threshold so disaggregated results cannot single out individuals or tiny subgroups.
-- Sources: Cifor et al. (2019); ACM (2018) — 1.2 avoid harm, 1.6 respect privacy; argued against GDPR data-minimisation and k-anonymity (Sweeney, 2002) in 5.2/6.2.
+- Sources: Cifor et al. (2019); ACM (2018) — 1.2 avoid harm, 1.6 respect privacy; argued against GDPR data-minimisation and k-anonymity (Sweeney, 2002) in §5.2/§6.2.
 - Design hook: suppression rule inside the Q_eq query catalogue; attribute inventory justified in the datasheet.
-- Evidence: 5.2 exposure observations on disaggregated outputs.
+- Evidence: §5.2 exposure observations on disaggregated outputs.
 
 ## R10 — Dataset quality is scored, not asserted
 
 - Requirement: Each registered dataset is assessed against the ten Venus items and the assessment is recorded in the dataset registry, so the case description's quality claims are auditable rather than rhetorical.
 - Sources: Chicco et al. (2025).
 - Design hook: assessment artefact alongside the datasheet in `datasets/<ds>/`.
-- Evidence: recorded assessment; 6.1 audit.
+- Evidence: recorded assessment; §6.1 audit.
 
 ## R11 — Findings report benefits and costs symmetrically, reproducibly
 
 - Requirement: The measurement harness emits effectiveness (Q_eq answerability, signal reproduction) and costs (complexity, storage, exposure) from one command, with the environment captured per run (engine version, image digest, threads, memory), so reporting cannot cherry-pick and any number can be regenerated.
 - Sources: ACM (2018) — 1.3 honesty, 2.5 comprehensive evaluations; Le (2024) — activism needs contestable, credible numbers.
 - Design hook: Phase E bench harness (fixed pragmas, N = 5, medians, envinfo per row).
-- Evidence: `results/bench_summary.csv`, `results/plans/`, `results/storage_by_column.csv`; the 5.1/5.2 symmetry itself.
+- Evidence: `results/bench_summary.csv`, `results/plans/`, `results/storage_by_column.csv`; the §5.1/§5.2 symmetry itself.
 
 ## R12 — Gender sensitivity is traceable at every lifecycle stage
 
 - Requirement: Every pipeline stage — registration, ingest, storage, schema, query, reporting — names its gender-sensitivity control and the R-numbers it serves; anticipation and reflexivity are exercised through ADRs that record design decisions and their equity implications as they are made.
 - Sources: Finlay-Smits et al. (2024) — the AIRR dimensions (anticipation, inclusion, reflexivity, responsiveness) applied across all stages; UN Women (2018).
 - Design hook: this registry, the DDL header contract, and the `docs/adr/` trail.
-- Evidence: header grep coverage; ADR sequence; 6.1 audit table mapping R1..R12 to ch. 5 evidence.
+- Evidence: header grep coverage; ADR sequence; §6.1 audit table mapping R1..R12 to §5 evidence.
 
 ## R13 — Equity-critical data conforms to an executable, use-specific specification
 
 - Requirement: Each registered dataset containing (or expected to contain) sex/gender information carries a machine-readable data-quality specification derived from its declared uses and the applicable R-requirements; ingest and aware-build runs compare actual data and processing outputs with that specification and append a rule-level conformance log. At minimum the rules separately test required-field/type preservation, raw and governed code membership, meaningful missingness, mapping coverage, provenance coverage, key/referential integrity, and continued disaggregability at the declared fact grains; error-severity nonconformities fail the run, warnings stay visible in the log.
-- Sources: King & Schwarzenbach (2020) — migration/transformation as general quality-risk points and the specification → monitoring/control mechanism; the gender-sensitive rule content is determined by R1, R3, R6, R7, R9, and R12 with their advocacy/standards sources, not by King & Schwarzenbach.
-- Design hook (4.2): `datasets/nhts2017/DATA_QUALITY_SPEC.json` — purpose/syntax/semantics/pragmatics declarations plus executable rules with stable `DQ-*` IDs — run by `gdgap validate nhts2017`, automatically after ingest and after every aware build on either backend (ADR-0009). Loss is operationalised as attribute omission, response-state collapse, sex/gender conflation, provenance loss, grain detachment, or lost disaggregability — not merely corrupted cells; the blind variant stays exempt per the conventions above.
+- Sources: King & Schwarzenbach (2020) — migration/transformation as general quality-risk points and the specification → monitoring/control mechanism; the gender-sensitive rule content is determined by R1, R3, R6, R7, R9, and R12 with their advocacy/standards sources.
+- Design hook (§4.2): `datasets/nhts2017/DATA_QUALITY_SPEC.json` — purpose/syntax/semantics/pragmatics declarations plus executable rules with stable `DQ-*` IDs — run by `gdgap validate nhts2017`, automatically after ingest and after every aware build on either backend (ADR-0009). Loss is operationalised as attribute omission, response-state collapse, sex/gender conflation, provenance loss, grain detachment, or lost disaggregability — not merely corrupted cells; the blind variant stays exempt per the conventions above.
 - Evidence: `results/quality/nhts2017/conformance.csv` (run id, snapshot, commit, stage, backend, rule ID, R-ID, expected, observed, severity, pass/fail, evidence pointer); integration tests cover passing fixtures and intentional failures.
 
 ## Parked corpus extensions

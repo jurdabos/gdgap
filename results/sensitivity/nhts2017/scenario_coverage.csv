@@ -1,0 +1,3 @@
+snapshot,git_commit,scenario,persons_excluded_n,person_weight_excluded_pct,trips_excluded_n,trip_weight_excluded_pct,persons_reclassified_n
+61,ef360f52b4badaf0b100354a40e563706be1424a,observed_only,243,0.1198,711,0.1092,0
+61,ef360f52b4badaf0b100354a40e563706be1424a,reported_values,243,0.1198,711,0.1092,34

@@ -491,6 +491,15 @@ def validate_cmd(dataset: str, stage: str, backend: str) -> None:
         validate(dataset=dataset, stage=item, backend_name=backend)
 
 
+@cli.command("audit-imputation")
+def audit_imputation_cmd() -> None:
+    """Emits the imputation sensitivity audit (provenance split, rates, scenario deltas) for the aware build."""
+    # Importing lazily so push invocations skip the duckdb import
+    from gdgap.sensitivity import audit_imputation
+
+    audit_imputation()
+
+
 @cli.command("mysql-doctor")
 @click.option("--json", "as_json", is_flag=True, help="Emit the sanitized facts as JSON")
 def mysql_doctor_cmd(as_json: bool) -> None:

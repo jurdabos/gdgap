@@ -9,7 +9,7 @@ gdgap needs a local-first analytical engine and a lake-style data plane that sta
 
 ## Decision
 
-Use DuckDB as the sole query engine, with a DuckLake-style layout: raw inputs under `data/raw/`, lake storage under `data/lake/`, and the catalog under `catalog/`.
+Use DuckDB as the sole query engine, with a DuckLake table format and catalog: raw inputs under `data/raw/`, lake storage under `data/lake/`, and the catalog under `catalog/`.
 
 ## Engine pin
 

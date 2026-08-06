@@ -1,0 +1,10 @@
+snapshot,git_commit,dimension,category,persons_n,imputed_n,imputed_rate_pct,imputed_unstable,edited_n,edited_rate_pct,edited_unstable,non_reported_n,non_reported_rate_pct
+61,ef360f52b4badaf0b100354a40e563706be1424a,completed_sex_code,1,124805,118,0.0945,False,17,0.0136,True,135,0.1082
+61,ef360f52b4badaf0b100354a40e563706be1424a,completed_sex_code,2,139429,125,0.0897,False,17,0.0122,True,142,0.1018
+61,ef360f52b4badaf0b100354a40e563706be1424a,completed_sex_code,TOTAL,264234,243,0.0920,False,34,0.0129,False,277,0.1048
+61,ef360f52b4badaf0b100354a40e563706be1424a,age_band,0-17,33146,46,0.1388,False,17,0.0513,True,63,0.1901
+61,ef360f52b4badaf0b100354a40e563706be1424a,age_band,18-39,55824,49,0.0878,False,4,0.0072,True,53,0.0949
+61,ef360f52b4badaf0b100354a40e563706be1424a,age_band,40-64,101342,54,0.0533,False,13,0.0128,True,67,0.0661
+61,ef360f52b4badaf0b100354a40e563706be1424a,age_band,65plus,73426,17,0.0232,True,0,0.0000,True,17,0.0232
+61,ef360f52b4badaf0b100354a40e563706be1424a,age_band,reserve,496,77,15.5242,False,0,0.0000,True,77,15.5242
+61,ef360f52b4badaf0b100354a40e563706be1424a,age_band,TOTAL,264234,243,0.0920,False,34,0.0129,False,277,0.1048
