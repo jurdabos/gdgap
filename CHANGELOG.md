@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Adopted the canonical non-truncating CLI help from acidbase: the top-level command group is now built with `acidbase.cli_utils.group` (a `click.Group` subclass) instead of `click.group`. Click's default group listing truncates each command's short help at 45 characters, so longer descriptions ended in `...`; the shared group wraps the full first paragraph onto aligned continuation lines instead. `RichGroup.main` also routes output through `ensure_unicode_safe_streams()`, so non-ASCII help (em dashes, accented words) survives on Windows consoles using a legacy code page. `uv.lock` pins acidbase at the commit providing `cli_utils`.
+- Consolidated the CLI onto the ecosystem's canonical push workflow: removed the verbatim copy of acidbase's push machinery (the DVC extension sets, nine private helpers `_get_project_root` / `_get_project_name` / `_has_dvc` / `_run` / `_has_changes` / `_count_unpushed` / `_hooks_modified_files` / `_find_untracked_for_dvc` / `_find_dvc_changed_outs` / `_auto_commit_message`, and the 135-line inline `push` command) in favour of `from acidbase.push import push_command`. The duplicate came from the pre-acidbase scaffolder template this repo was generated from and had already drifted from upstream, missing later fixes such as the clean-but-ahead push guard and dual-publish support. `src/gdgap/cli.py` drops from 529 to 194 lines; the stale template module docstring ("Reusable push CLI") and the placeholder group docstring ("CLI tools.") were replaced with gdgap-specific text. Verified beforehand that nothing outside the push block referenced any removed symbol.
 
 ### Added
 
