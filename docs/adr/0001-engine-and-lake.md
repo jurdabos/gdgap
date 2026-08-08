@@ -27,3 +27,7 @@ uv run python -c "import duckdb; print(duckdb.sql('select version()'))"
 
 - Engine upgrades are deliberate: bump via `uv lock --upgrade-package duckdb`, re-run the version probe, and record the new pin here.
 - Lake and catalog artefacts are reproducible from raw data plus committed DDL; they are never restored from git.
+
+## Addendum (2026-08-08): data file format — considered and deferred
+
+Vortex (LF AI & Data incubation; first-class DuckDB extension) and F3 (Zeng et al., 2025; Wasm-embedded decoders; a self-declared research prototype) were evaluated as Parquet successors for the data plane. Deferred without change to this pin: DuckLake writes Parquet only — the experimental Vortex support PR (duckdb/ducklake #1193) was closed by the maintainers in May 2026 — the claimed wins target scales and access patterns this artefact does not have, and a format swap would invalidate stamped evidence without a re-collection protocol (cf. ADR-0010). Revisit only if DuckLake gains pluggable data-file formats; the `{schema}`-neutral query catalogue and the backend seam keep the file format an implementation detail below the artefact's interfaces.
