@@ -1,0 +1,17 @@
+run_id,git_commit,backend,variant,query_id,family,temperature,outcome,n_recorded,median_ms,iqr_ms,min_ms,max_ms,result_hash,hash_stable
+20260808T210507Z-ducklake-blind-warm,f9a011727e3954ba68fb5f040a3485a71eb9cf08,ducklake,blind,q_agn_01_care_trip_share_total,q_agn,warm,ok,5,4.976,0.498,4.448,5.866,470b0e85c8256e0128368d105ddd8a6e0c2e6faa260f67cfe7152f9a3ac557de,True
+20260808T210507Z-ducklake-blind-warm,f9a011727e3954ba68fb5f040a3485a71eb9cf08,ducklake,blind,q_agn_02_mode_share,q_agn,warm,ok,5,5.191,0.788,4.266,5.624,c8deb0342c718de74780090569ec45fbbe19419877210fbdf2ebb707cd6ca030,True
+20260808T210507Z-ducklake-blind-warm,f9a011727e3954ba68fb5f040a3485a71eb9cf08,ducklake,blind,q_eq_01_care_trip_share_by_sex,q_eq,warm,not_representable,0,,,,,,
+20260808T210507Z-ducklake-blind-warm,f9a011727e3954ba68fb5f040a3485a71eb9cf08,ducklake,blind,q_eq_02_ppr,q_eq,warm,not_representable,0,,,,,,
+20260808T210529Z-ducklake-aware-warm,f9a011727e3954ba68fb5f040a3485a71eb9cf08,ducklake,aware,q_agn_01_care_trip_share_total,q_agn,warm,ok,5,5.096,0.217,4.297,5.377,470b0e85c8256e0128368d105ddd8a6e0c2e6faa260f67cfe7152f9a3ac557de,True
+20260808T210529Z-ducklake-aware-warm,f9a011727e3954ba68fb5f040a3485a71eb9cf08,ducklake,aware,q_agn_02_mode_share,q_agn,warm,ok,5,4.578,0.215,4.243,5.219,c8deb0342c718de74780090569ec45fbbe19419877210fbdf2ebb707cd6ca030,True
+20260808T210529Z-ducklake-aware-warm,f9a011727e3954ba68fb5f040a3485a71eb9cf08,ducklake,aware,q_eq_01_care_trip_share_by_sex,q_eq,warm,ok,5,30.826,2.236,29.010,31.893,fc671964cd4c12479223b483b0b00871693be8760c0ba5112f8e74296e83cf22,True
+20260808T210529Z-ducklake-aware-warm,f9a011727e3954ba68fb5f040a3485a71eb9cf08,ducklake,aware,q_eq_02_ppr,q_eq,warm,ok,5,33.739,3.447,32.483,38.715,0d09ecbacc3be1d3ca4d5f2ba0171033dde604e9d14fcf8087eab2160c6e6ab7,True
+20260808T210547Z-innodb-blind-warm,f9a011727e3954ba68fb5f040a3485a71eb9cf08,innodb,blind,q_agn_01_care_trip_share_total,q_agn,warm,ok,5,394.120,7.137,389.578,413.947,470b0e85c8256e0128368d105ddd8a6e0c2e6faa260f67cfe7152f9a3ac557de,True
+20260808T210547Z-innodb-blind-warm,f9a011727e3954ba68fb5f040a3485a71eb9cf08,innodb,blind,q_agn_02_mode_share,q_agn,warm,ok,5,451.845,13.767,440.053,483.509,c8deb0342c718de74780090569ec45fbbe19419877210fbdf2ebb707cd6ca030,True
+20260808T210547Z-innodb-blind-warm,f9a011727e3954ba68fb5f040a3485a71eb9cf08,innodb,blind,q_eq_01_care_trip_share_by_sex,q_eq,warm,not_representable,0,,,,,,
+20260808T210547Z-innodb-blind-warm,f9a011727e3954ba68fb5f040a3485a71eb9cf08,innodb,blind,q_eq_02_ppr,q_eq,warm,not_representable,0,,,,,,
+20260808T210646Z-innodb-aware-warm,f9a011727e3954ba68fb5f040a3485a71eb9cf08,innodb,aware,q_agn_01_care_trip_share_total,q_agn,warm,ok,5,145.243,1.521,143.203,148.332,470b0e85c8256e0128368d105ddd8a6e0c2e6faa260f67cfe7152f9a3ac557de,True
+20260808T210646Z-innodb-aware-warm,f9a011727e3954ba68fb5f040a3485a71eb9cf08,innodb,aware,q_agn_02_mode_share,q_agn,warm,ok,5,200.893,3.163,199.829,205.569,c8deb0342c718de74780090569ec45fbbe19419877210fbdf2ebb707cd6ca030,True
+20260808T210646Z-innodb-aware-warm,f9a011727e3954ba68fb5f040a3485a71eb9cf08,innodb,aware,q_eq_01_care_trip_share_by_sex,q_eq,warm,ok,5,613.995,4.277,600.530,618.216,fc671964cd4c12479223b483b0b00871693be8760c0ba5112f8e74296e83cf22,True
+20260808T210646Z-innodb-aware-warm,f9a011727e3954ba68fb5f040a3485a71eb9cf08,innodb,aware,q_eq_02_ppr,q_eq,warm,ok,5,514.796,7.946,512.447,531.498,0d09ecbacc3be1d3ca4d5f2ba0171033dde604e9d14fcf8087eab2160c6e6ab7,True

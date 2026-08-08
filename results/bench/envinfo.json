@@ -1,0 +1,108 @@
+{
+  "20260808T210507Z-ducklake-blind-warm": {
+    "backend": "ducklake",
+    "backend_native_settings": {
+      "memory_limit": "7.4 GiB",
+      "threads": "4"
+    },
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 275HX",
+    "dataset": "nhts2017",
+    "engine_version": "duckdb v1.5.4",
+    "git_commit": "f9a011727e3954ba68fb5f040a3485a71eb9cf08",
+    "image_digest": "",
+    "kernel": "6.18.33.2-microsoft-standard-WSL2",
+    "python_version": "3.13.13",
+    "queries": [
+      "q_agn_01_care_trip_share_total",
+      "q_agn_02_mode_share",
+      "q_eq_01_care_trip_share_by_sex",
+      "q_eq_02_ppr"
+    ],
+    "ram_bytes": 134770925568,
+    "repetitions": 5,
+    "seed": 315714136,
+    "temperature": "warm",
+    "timestamp_utc": "2026-08-08 21:05:07",
+    "variant": "blind"
+  },
+  "20260808T210529Z-ducklake-aware-warm": {
+    "backend": "ducklake",
+    "backend_native_settings": {
+      "memory_limit": "7.4 GiB",
+      "threads": "4"
+    },
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 275HX",
+    "dataset": "nhts2017",
+    "engine_version": "duckdb v1.5.4",
+    "git_commit": "f9a011727e3954ba68fb5f040a3485a71eb9cf08",
+    "image_digest": "",
+    "kernel": "6.18.33.2-microsoft-standard-WSL2",
+    "python_version": "3.13.13",
+    "queries": [
+      "q_agn_01_care_trip_share_total",
+      "q_agn_02_mode_share",
+      "q_eq_01_care_trip_share_by_sex",
+      "q_eq_02_ppr"
+    ],
+    "ram_bytes": 134770925568,
+    "repetitions": 5,
+    "seed": 3379672,
+    "temperature": "warm",
+    "timestamp_utc": "2026-08-08 21:05:29",
+    "variant": "aware"
+  },
+  "20260808T210547Z-innodb-blind-warm": {
+    "backend": "innodb",
+    "backend_native_settings": {
+      "innodb_buffer_pool_size": "134217728",
+      "mysql_host": "127.0.0.1",
+      "mysql_port": "3307"
+    },
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 275HX",
+    "dataset": "nhts2017",
+    "engine_version": "mysql 8.4.11",
+    "git_commit": "f9a011727e3954ba68fb5f040a3485a71eb9cf08",
+    "image_digest": "",
+    "kernel": "6.18.33.2-microsoft-standard-WSL2",
+    "python_version": "3.13.13",
+    "queries": [
+      "q_agn_01_care_trip_share_total",
+      "q_agn_02_mode_share",
+      "q_eq_01_care_trip_share_by_sex",
+      "q_eq_02_ppr"
+    ],
+    "ram_bytes": 134770925568,
+    "repetitions": 5,
+    "seed": 3946312516,
+    "temperature": "warm",
+    "timestamp_utc": "2026-08-08 21:05:47",
+    "variant": "blind"
+  },
+  "20260808T210646Z-innodb-aware-warm": {
+    "backend": "innodb",
+    "backend_native_settings": {
+      "innodb_buffer_pool_size": "134217728",
+      "mysql_host": "127.0.0.1",
+      "mysql_port": "3307"
+    },
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 275HX",
+    "dataset": "nhts2017",
+    "engine_version": "mysql 8.4.11",
+    "git_commit": "f9a011727e3954ba68fb5f040a3485a71eb9cf08",
+    "image_digest": "",
+    "kernel": "6.18.33.2-microsoft-standard-WSL2",
+    "python_version": "3.13.13",
+    "queries": [
+      "q_agn_01_care_trip_share_total",
+      "q_agn_02_mode_share",
+      "q_eq_01_care_trip_share_by_sex",
+      "q_eq_02_ppr"
+    ],
+    "ram_bytes": 134770925568,
+    "repetitions": 5,
+    "seed": 254079731,
+    "temperature": "warm",
+    "timestamp_utc": "2026-08-08 21:06:46",
+    "variant": "aware"
+  }
+}

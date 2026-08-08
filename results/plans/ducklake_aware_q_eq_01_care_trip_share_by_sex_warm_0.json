@@ -1,0 +1,216 @@
+{
+    "total_bytes_written": 0,
+    "total_bytes_read": 17705,
+    "system_peak_temp_dir_size": 0,
+    "system_peak_buffer_memory": 84235986,
+    "rows_returned": 2,
+    "wal_replay_entry_count": 0,
+    "result_set_size": 96,
+    "query_name": "-- R2, R9, R11: equity benchmark query (Q_eq) — care-trip share disaggregated by sex through the\n-- deployed aware view, so small-cell suppression (n >= 30, R9) stays inside the measured schema.\n-- Not representable on the blind schema: recorded as a capability state, never executed there.\nSELECT\n    sex_code,\n    trips_n,\n    care_trip_weight,\n    all_trip_weight,\n    care_trip_share\nFROM lake.aware.v_care_trip_share_by_sex\nORDER BY sex_code;\n",
+    "waiting_to_attach_latency": 0.0,
+    "attach_load_storage_latency": 0.0,
+    "blocked_thread_time": 0.0,
+    "cpu_time": 0.102438229,
+    "extra_info": {},
+    "total_memory_allocated": 20447232,
+    "cumulative_cardinality": 3034958,
+    "checkpoint_latency": 0.0,
+    "cumulative_rows_scanned": 4751224,
+    "write_to_wal_latency": 0.0,
+    "latency": 0.048466788,
+    "attach_replay_wal_latency": 0.0,
+    "commit_local_storage_latency": 0.0,
+    "children": [
+        {
+            "system_peak_temp_dir_size": 0,
+            "system_peak_buffer_memory": 0,
+            "result_set_size": 96,
+            "operator_timing": 0.000095002,
+            "operator_type": "ORDER_BY",
+            "cpu_time": 0.102433483,
+            "extra_info": {
+                "Order By": "lake.aware.v_care_trip_share_by_sex.sex_code ASC"
+            },
+            "cumulative_cardinality": 3034958,
+            "cumulative_rows_scanned": 4751224,
+            "operator_cardinality": 2,
+            "operator_name": "ORDER_BY",
+            "operator_rows_scanned": 0,
+            "children": [
+                {
+                    "system_peak_temp_dir_size": 0,
+                    "system_peak_buffer_memory": 0,
+                    "result_set_size": 96,
+                    "operator_timing": 0.000004032,
+                    "operator_type": "PROJECTION",
+                    "cpu_time": 0.10233848100000001,
+                    "extra_info": {
+                        "Projections": [
+                            "sex_code",
+                            "trips_n",
+                            "care_trip_weight",
+                            "all_trip_weight",
+                            "care_trip_share"
+                        ],
+                        "Estimated Cardinality": "33482"
+                    },
+                    "cumulative_cardinality": 3034956,
+                    "cumulative_rows_scanned": 4751224,
+                    "operator_cardinality": 2,
+                    "operator_name": "PROJECTION",
+                    "operator_rows_scanned": 0,
+                    "children": [
+                        {
+                            "system_peak_temp_dir_size": 0,
+                            "system_peak_buffer_memory": 0,
+                            "result_set_size": 80,
+                            "operator_timing": 0.000022958,
+                            "operator_type": "FILTER",
+                            "cpu_time": 0.10233444900000001,
+                            "extra_info": {
+                                "Expression": "(count_star() >= 30)",
+                                "Estimated Cardinality": "33482"
+                            },
+                            "cumulative_cardinality": 3034954,
+                            "cumulative_rows_scanned": 4751224,
+                            "operator_cardinality": 2,
+                            "operator_name": "FILTER",
+                            "operator_rows_scanned": 0,
+                            "children": [
+                                {
+                                    "system_peak_temp_dir_size": 0,
+                                    "system_peak_buffer_memory": 0,
+                                    "result_set_size": 80,
+                                    "operator_timing": 0.024981704000000007,
+                                    "operator_type": "HASH_GROUP_BY",
+                                    "cpu_time": 0.102311491,
+                                    "extra_info": {
+                                        "Groups": "#0",
+                                        "Aggregates": [
+                                            "count_star()",
+                                            "sum(#1)",
+                                            "sum(#2)"
+                                        ],
+                                        "Estimated Cardinality": "167412"
+                                    },
+                                    "cumulative_cardinality": 3034952,
+                                    "cumulative_rows_scanned": 4751224,
+                                    "operator_cardinality": 2,
+                                    "operator_name": "HASH_GROUP_BY",
+                                    "operator_rows_scanned": 0,
+                                    "children": [
+                                        {
+                                            "system_peak_temp_dir_size": 0,
+                                            "system_peak_buffer_memory": 0,
+                                            "result_set_size": 29554304,
+                                            "operator_timing": 0.005270054000000001,
+                                            "operator_type": "PROJECTION",
+                                            "cpu_time": 0.077329787,
+                                            "extra_info": {
+                                                "Projections": [
+                                                    "sex_code",
+                                                    "CASE  WHEN (((whyto = '06') OR (whyfrom = '06'))) THEN (wttrdfin) ELSE 0.0 END",
+                                                    "wttrdfin"
+                                                ],
+                                                "Estimated Cardinality": "184711"
+                                            },
+                                            "cumulative_cardinality": 3034950,
+                                            "cumulative_rows_scanned": 4751224,
+                                            "operator_cardinality": 923572,
+                                            "operator_name": "PROJECTION",
+                                            "operator_rows_scanned": 0,
+                                            "children": [
+                                                {
+                                                    "system_peak_temp_dir_size": 0,
+                                                    "system_peak_buffer_memory": 0,
+                                                    "result_set_size": 51720032,
+                                                    "operator_timing": 0.040933860999999995,
+                                                    "operator_type": "HASH_JOIN",
+                                                    "cpu_time": 0.072059733,
+                                                    "extra_info": {
+                                                        "Join Type": "INNER",
+                                                        "Conditions": [
+                                                            "houseid = houseid",
+                                                            "personid = personid"
+                                                        ],
+                                                        "Estimated Cardinality": "184711"
+                                                    },
+                                                    "cumulative_cardinality": 2111378,
+                                                    "cumulative_rows_scanned": 4751224,
+                                                    "operator_cardinality": 923572,
+                                                    "operator_name": "HASH_JOIN",
+                                                    "operator_rows_scanned": 0,
+                                                    "children": [
+                                                        {
+                                                            "system_peak_temp_dir_size": 0,
+                                                            "system_peak_buffer_memory": 0,
+                                                            "result_set_size": 59108608,
+                                                            "operator_timing": 0.019229331000000002,
+                                                            "operator_type": "TABLE_SCAN",
+                                                            "cpu_time": 0.019229331000000002,
+                                                            "extra_info": {
+                                                                "Table": "fact_trip",
+                                                                "Projections": [
+                                                                    "houseid",
+                                                                    "personid",
+                                                                    "whyto",
+                                                                    "whyfrom",
+                                                                    "wttrdfin"
+                                                                ],
+                                                                "Estimated Cardinality": "923572",
+                                                                "Dynamic Filters": [
+                                                                    "optional: houseid>=30000007 AND optional: houseid<=50515573",
+                                                                    "optional: personid>='01' AND optional: personid<='13'"
+                                                                ],
+                                                                "Total Files Read": "1",
+                                                                "Inlined Tables Read": "1",
+                                                                "Filename(s)": "data/lake/aware/fact_trip/ducklake-019fcd3a-71f6-7821-bc97-f93af04b0d8e.parquet"
+                                                            },
+                                                            "cumulative_cardinality": 923572,
+                                                            "cumulative_rows_scanned": 3694288,
+                                                            "operator_cardinality": 923572,
+                                                            "operator_name": "DUCKLAKE_SCAN",
+                                                            "operator_rows_scanned": 3694288,
+                                                            "children": []
+                                                        },
+                                                        {
+                                                            "system_peak_temp_dir_size": 0,
+                                                            "system_peak_buffer_memory": 0,
+                                                            "result_set_size": 10569360,
+                                                            "operator_timing": 0.011896541,
+                                                            "operator_type": "TABLE_SCAN",
+                                                            "cpu_time": 0.011896541,
+                                                            "extra_info": {
+                                                                "Table": "dim_person_sex",
+                                                                "Projections": [
+                                                                    "houseid",
+                                                                    "personid",
+                                                                    "sex_code"
+                                                                ],
+                                                                "Filters": "is_current",
+                                                                "Estimated Cardinality": "52846",
+                                                                "Total Files Read": "1",
+                                                                "Inlined Tables Read": "1",
+                                                                "Filename(s)": "data/lake/aware/dim_person_sex/ducklake-019fcd3a-7146-7012-918a-98dadf03f8f0.parquet"
+                                                            },
+                                                            "cumulative_cardinality": 264234,
+                                                            "cumulative_rows_scanned": 1056936,
+                                                            "operator_cardinality": 264234,
+                                                            "operator_name": "DUCKLAKE_SCAN",
+                                                            "operator_rows_scanned": 1056936,
+                                                            "children": []
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,113 @@
+{
+  "query_block": {
+    "select_id": 1,
+    "cost_info": {
+      "query_cost": "1180020.12"
+    },
+    "ordering_operation": {
+      "using_filesort": true,
+      "cost_info": {
+        "sort_cost": "1060690.00"
+      },
+      "table": {
+        "table_name": "v_care_trip_share_by_sex",
+        "access_type": "ALL",
+        "rows_examined_per_scan": 1060690,
+        "rows_produced_per_join": 1060690,
+        "filtered": "100.00",
+        "cost_info": {
+          "read_cost": "13261.12",
+          "eval_cost": "106069.00",
+          "prefix_cost": "119330.12",
+          "data_read_per_join": "56M"
+        },
+        "used_columns": [
+          "sex_code",
+          "trips_n",
+          "care_trip_weight",
+          "all_trip_weight",
+          "care_trip_share"
+        ],
+        "materialized_from_subquery": {
+          "using_temporary_table": true,
+          "dependent": false,
+          "cacheable": true,
+          "query_block": {
+            "select_id": 2,
+            "cost_info": {
+              "query_cost": "192998.05"
+            },
+            "grouping_operation": {
+              "using_temporary_table": true,
+              "using_filesort": false,
+              "nested_loop": [
+                {
+                  "table": {
+                    "table_name": "d",
+                    "access_type": "ALL",
+                    "possible_keys": [
+                      "PRIMARY"
+                    ],
+                    "rows_examined_per_scan": 265409,
+                    "rows_produced_per_join": 238868,
+                    "filtered": "90.00",
+                    "cost_info": {
+                      "read_cost": "2918.84",
+                      "eval_cost": "23886.81",
+                      "prefix_cost": "26805.65",
+                      "data_read_per_join": "38M"
+                    },
+                    "used_columns": [
+                      "houseid",
+                      "personid",
+                      "sex_code",
+                      "valid_from",
+                      "is_current"
+                    ],
+                    "attached_condition": "(0 <> `gdgap_aware`.`d`.`is_current`)"
+                  }
+                },
+                {
+                  "table": {
+                    "table_name": "f",
+                    "access_type": "ref",
+                    "possible_keys": [
+                      "PRIMARY"
+                    ],
+                    "key": "PRIMARY",
+                    "used_key_parts": [
+                      "houseid",
+                      "personid"
+                    ],
+                    "key_length": "26",
+                    "ref": [
+                      "gdgap_aware.d.houseid",
+                      "gdgap_aware.d.personid"
+                    ],
+                    "rows_examined_per_scan": 4,
+                    "rows_produced_per_join": 1060690,
+                    "filtered": "100.00",
+                    "cost_info": {
+                      "read_cost": "60123.39",
+                      "eval_cost": "106069.02",
+                      "prefix_cost": "192998.05",
+                      "data_read_per_join": "145M"
+                    },
+                    "used_columns": [
+                      "houseid",
+                      "personid",
+                      "tdtrpnum",
+                      "whyto",
+                      "whyfrom",
+                      "wttrdfin"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

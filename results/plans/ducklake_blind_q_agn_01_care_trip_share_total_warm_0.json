@@ -1,0 +1,117 @@
+{
+    "total_bytes_written": 0,
+    "total_bytes_read": 21132,
+    "system_peak_temp_dir_size": 0,
+    "system_peak_buffer_memory": 39782373,
+    "rows_returned": 1,
+    "wal_replay_entry_count": 0,
+    "result_set_size": 24,
+    "query_name": "-- R11: agnostic benchmark query (Q_agn) — population-total care-trip share straight from the\n-- fact grain; touches no sex attribute or join path, so blind and aware must return equivalent\n-- values on the same engine (ADR-0004 hash check).\n-- Care trip definition: WHYTO/WHYFROM code '06' = drop off / pick up someone (2017 NHTS codebook).\nSELECT\n    sum(CASE WHEN whyto = '06' OR whyfrom = '06' THEN wttrdfin ELSE 0 END) AS care_trip_weight,\n    sum(wttrdfin) AS all_trip_weight,\n    sum(CASE WHEN whyto = '06' OR whyfrom = '06' THEN wttrdfin ELSE 0 END) / sum(wttrdfin) AS care_trip_share\nFROM lake.blind.fact_trip;\n",
+    "waiting_to_attach_latency": 0.0,
+    "attach_load_storage_latency": 0.0,
+    "blocked_thread_time": 0.0,
+    "cpu_time": 0.030037600999999997,
+    "extra_info": {},
+    "total_memory_allocated": 0,
+    "cumulative_cardinality": 1847146,
+    "checkpoint_latency": 0.0,
+    "cumulative_rows_scanned": 3694288,
+    "write_to_wal_latency": 0.0,
+    "latency": 0.017178618,
+    "attach_replay_wal_latency": 0.0,
+    "commit_local_storage_latency": 0.0,
+    "children": [
+        {
+            "system_peak_temp_dir_size": 0,
+            "system_peak_buffer_memory": 0,
+            "result_set_size": 24,
+            "operator_timing": 0.000006043,
+            "operator_type": "PROJECTION",
+            "cpu_time": 0.030029708999999998,
+            "extra_info": {
+                "Projections": [
+                    "care_trip_weight",
+                    "all_trip_weight",
+                    "care_trip_share"
+                ],
+                "Estimated Cardinality": "1"
+            },
+            "cumulative_cardinality": 1847146,
+            "cumulative_rows_scanned": 3694288,
+            "operator_cardinality": 1,
+            "operator_name": "PROJECTION",
+            "operator_rows_scanned": 0,
+            "children": [
+                {
+                    "system_peak_temp_dir_size": 0,
+                    "system_peak_buffer_memory": 0,
+                    "result_set_size": 16,
+                    "operator_timing": 0.0009250599999999999,
+                    "operator_type": "UNGROUPED_AGGREGATE",
+                    "cpu_time": 0.030023665999999997,
+                    "extra_info": {
+                        "Aggregates": [
+                            "sum(#0)",
+                            "sum(#1)"
+                        ]
+                    },
+                    "cumulative_cardinality": 1847145,
+                    "cumulative_rows_scanned": 3694288,
+                    "operator_cardinality": 1,
+                    "operator_name": "UNGROUPED_AGGREGATE",
+                    "operator_rows_scanned": 0,
+                    "children": [
+                        {
+                            "system_peak_temp_dir_size": 0,
+                            "system_peak_buffer_memory": 0,
+                            "result_set_size": 14777152,
+                            "operator_timing": 0.0047807050000000005,
+                            "operator_type": "PROJECTION",
+                            "cpu_time": 0.029098606,
+                            "extra_info": {
+                                "Projections": [
+                                    "CASE  WHEN (((whyto = '06') OR (whyfrom = '06'))) THEN (wttrdfin) ELSE 0.0 END",
+                                    "wttrdfin"
+                                ],
+                                "Estimated Cardinality": "923572"
+                            },
+                            "cumulative_cardinality": 1847144,
+                            "cumulative_rows_scanned": 3694288,
+                            "operator_cardinality": 923572,
+                            "operator_name": "PROJECTION",
+                            "operator_rows_scanned": 0,
+                            "children": [
+                                {
+                                    "system_peak_temp_dir_size": 0,
+                                    "system_peak_buffer_memory": 0,
+                                    "result_set_size": 36942880,
+                                    "operator_timing": 0.024317901,
+                                    "operator_type": "TABLE_SCAN",
+                                    "cpu_time": 0.024317901,
+                                    "extra_info": {
+                                        "Table": "fact_trip",
+                                        "Projections": [
+                                            "whyto",
+                                            "whyfrom",
+                                            "wttrdfin"
+                                        ],
+                                        "Estimated Cardinality": "923572",
+                                        "Total Files Read": "1",
+                                        "Inlined Tables Read": "1",
+                                        "Filename(s)": "data/lake/blind/fact_trip/ducklake-019f807e-2235-7aef-94ff-d733cd74c38f.parquet"
+                                    },
+                                    "cumulative_cardinality": 923572,
+                                    "cumulative_rows_scanned": 3694288,
+                                    "operator_cardinality": 923572,
+                                    "operator_name": "DUCKLAKE_SCAN",
+                                    "operator_rows_scanned": 3694288,
+                                    "children": []
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
