@@ -11,3 +11,7 @@ ts_utc,dataset,table,action,rows,target
 2026-07-19 15:14:20,nhts2017,perpub,skipped,264234,gdgap_lake
 2026-07-19 15:14:20,nhts2017,trippub,skipped,923572,gdgap_lake
 2026-07-19 15:14:20,nhts2017,vehpub,skipped,256115,gdgap_lake
+2026-08-08 14:05:32,nhts2017,hhpub,skipped,129696,gdgap_lake
+2026-08-08 14:05:32,nhts2017,perpub,skipped,264234,gdgap_lake
+2026-08-08 14:05:32,nhts2017,trippub,skipped,923572,gdgap_lake
+2026-08-08 14:05:32,nhts2017,vehpub,skipped,256115,gdgap_lake
