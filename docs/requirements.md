@@ -20,7 +20,7 @@ Corpus streams: disaggregation mandates (SAGER — Heidari et al., 2016; UN Wome
 
 ## R2 — Person-level facts are disaggregable by sex at every analysis grain
 
-- Requirement: Any measure computable from the warehouse is computable disaggregated by sex without schema change — the Q_eq query family must run on the aware build as plain SQL.
+- Requirement: Every declared person-linked analysis grain is computable disaggregated by sex without schema change — the Q_eq query family must run on the aware build as plain SQL.
 - Sources: Heidari et al. (2016) — disaggregate data by sex or gender whenever feasible; UN Women (2018); Vaitla et al. (2017).
 - Design hook (§4.2): sex/gender as a first-class dimension joinable to every fact grain.
 - Evidence: §5.1 — which equity queries the aware build answers that the blind build cannot.
