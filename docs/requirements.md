@@ -1,13 +1,13 @@
 # Requirements registry — R1..R13
 
-This registry converts the advocacy corpus of thesis subchapter §3.3 into numbered, engineer-inspectable requirements the artefact must satisfy. It is simultaneously the DSR "define requirements" activity (Johannesson & Perjons; see thesis §3.1), and it is the traceability spine of the project: §4.2 designs against these R-numbers, §5 measures against them, and §6.1 audits each as satisfied/partial/unmet.
+This registry converts the advocacy corpus of thesis subchapter §2.3 into numbered, engineer-inspectable requirements the artefact must satisfy. It is simultaneously the DSR "define requirements" activity (Johannesson & Perjons; see thesis §3.1), and it is the traceability spine of the project: §4.2 designs against these R-numbers, §5 measures against them, and §6.1 audits each as satisfied/partial/unmet.
 
 Corpus streams: disaggregation mandates (SAGER — Heidari et al., 2016; UN Women, 2018; Data2X — Vaitla et al., 2017), stewardship instruments (datasheets — Gebru et al., 2021; FAIR — Wilkinson et al., 2016), data-feminist design principles (D'Ignazio & Klein, 2020; the Manifest-No — Cifor et al., 2019), dataset-quality scoring (the Venus score — Chicco et al., 2025), professional duty (ACM, 2018), and gender-sensitive responsible innovation across all stages (AIRR — Finlay-Smits et al., 2024).
 
 ## Conventions (the traceability contract)
 
 - Registry headings follow `## R<n> — <short name>` exactly; `grep -E '^## R[0-9]+' docs/requirements.md` enumerates the valid IDs.
-- Every DDL file under `sql/ddl/<variant>/` must open with a header comment naming at least one R-number, e.g. `-- R3: provenance column sex_source records reported-vs-imputed` or `-- R2, R7: ...`. The Phase D build command refuses to run a file without one, so appendix A and the §4.2 traceability claim reduce to a grep.
+- Every DDL file under `sql/ddl/<variant>/` must open with a header comment naming at least one R-number, e.g. `-- R3: provenance column sex_source records reported-vs-imputed` or `-- R2, R7: ...`. The Phase D build command refuses to run a file without one, so appendix A and the §2.3 traceability claim reduce to a grep.
 - IDs are stable once cited: new requirements append at the end; retired ones are marked deprecated, never renumbered.
 - The gender-blind build variant deliberately violates the design requirements (R1–R3, R6–R8); the contrast is the experiment, not an oversight.
 
@@ -20,10 +20,11 @@ Corpus streams: disaggregation mandates (SAGER — Heidari et al., 2016; UN Wome
 
 ## R2 — Person-level facts are disaggregable by sex at every analysis grain
 
-- Requirement: Every declared person-linked analysis grain is computable disaggregated by sex without schema change — the Q_eq query family must run on the aware build as plain SQL.
-- Sources: Heidari et al. (2016) — disaggregate data by sex or gender whenever feasible; UN Women (2018); Vaitla et al. (2017).
+- Requirement: Every declared person-linked analysis grain for which sex is conceptually relevant and available is computable disaggregated by sex without schema change — the Q_eq query family must run on the aware build as plain SQL.
+- Sources: Heidari et al. (2016) — disaggregate data by sex or gender whenever feasible; UN Women (2018); Vaitla et al. (2017); UNDP, UNODC & OHCHR (2024) — the SDG 16 progress report's qualification: indicators whose units of analysis are non-person entities (financial flows, businesses, institutions, arms) cannot be sex-disaggregated, while person-centred indicators may recommend disaggregation yet still lack data.
 - Design hook (§4.2): sex/gender as a first-class dimension joinable to every fact grain.
 - Evidence: §5.1 — which equity queries the aware build answers that the blind build cannot.
+- Scope note: the universal claim is deliberately qualified (UNDP, UNODC & OHCHR, 2024). Measures whose unit of analysis is not a person are out of R2's scope by construction, not by omission; where sex is conceptually relevant but not available, the artefact exhibits the absence as a queryable state (R1's `NC` gender-identity path, R7's reserve codes) instead of fabricating disaggregability.
 
 ## R3 — Provenance of the sex value is first-class (reported vs imputed)
 

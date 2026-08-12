@@ -2,7 +2,7 @@
 Phase D build: one pipeline, parameterised by variant and backend.
 
 Executes sql/ddl/<variant>/ in filename order after enforcing the R-number header gate
-against docs/requirements.md, so appendix A and the 3.3 traceability claim reduce to a
+against docs/requirements.md, so appendix A and the §2.3 traceability claim reduce to a
 grep. The InnoDB foil additionally copies every base table of the built lake variant into
 MySQL, so both stores hold identical warehouse content from the identical Parquet source.
 """
