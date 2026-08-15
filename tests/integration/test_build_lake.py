@@ -9,7 +9,9 @@ import pytest
 from gdgap import build as build_module
 from gdgap.ingest import nhts2017
 
-requires_mysql = pytest.mark.skipif(not os.environ.get("GDGAP_MYSQL_URL"), reason="GDGAP_MYSQL_URL not set")
+requires_mysql = pytest.mark.skipif(
+    not os.environ.get("GDGAP_MYSQL_TEST_URL"), reason="GDGAP_MYSQL_TEST_URL not set (dedicated test endpoint)"
+)
 
 
 def _lake_query(root: Path, sql: str) -> list[tuple]:
@@ -77,8 +79,8 @@ def test_build_refuses_unregistered_ddl(lake_root):
 
 
 @requires_mysql
-def test_build_innodb_mirrors_lake(lake_root):
-    """Builds the InnoDB foil and verifies copied row counts (needs GDGAP_MYSQL_URL)."""
+def test_build_innodb_mirrors_lake(lake_root, mysql_test_endpoint):
+    """Builds the InnoDB foil and verifies copied row counts (needs GDGAP_MYSQL_TEST_URL)."""
     from gdgap.bench.backends.innodb import InnodbBackend
 
     nhts2017.ingest(root=lake_root)

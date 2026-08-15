@@ -2,18 +2,52 @@
 
 import hashlib
 import json
+import os
 import shutil
 from pathlib import Path
+from urllib.parse import urlparse
 
 import pytest
 from dotenv import load_dotenv
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
-# Loading the root .env before test modules are imported, so the requires_mysql markers
-# (evaluated from os.environ at import time) unskip without a shell export; override=False
-# keeps deliberate shell exports authoritative (ADR-0008)
+# Loading the root .env before test modules are imported, so a deliberately declared
+# GDGAP_MYSQL_TEST_URL unskips the live-InnoDB tests without a shell export; override=False
+# keeps deliberate shell exports authoritative (ADR-0008). The markers never key off
+# GDGAP_MYSQL_URL: pointing tests at the evidence server clobbered the full-scale mirrors
+# on 2026-08-10, because the InnoDB DDL hard-codes the gdgap_% database names.
 load_dotenv(REPO_ROOT / ".env", override=False)
+
+
+def _mysql_host_port(url: str) -> tuple[str, int]:
+    """Returns the (hostname, port) pair identifying a MySQL endpoint URL."""
+    parsed = urlparse(url)
+    return ((parsed.hostname or "*********").lower(), parsed.port or 3306)
+
+
+@pytest.fixture
+def mysql_test_endpoint(monkeypatch) -> str:
+    """
+    Routes live-InnoDB tests at the dedicated disposable MySQL test endpoint.
+
+    Reads GDGAP_MYSQL_TEST_URL, refuses to run while it resolves to the same server as
+    GDGAP_MYSQL_URL (the evidence endpoint), and rebinds GDGAP_MYSQL_URL for the test's
+    duration so the backend cannot reach the evidence server at all.
+    """
+    test_url = os.environ.get("GDGAP_MYSQL_TEST_URL")
+    if not test_url:
+        pytest.skip("GDGAP_MYSQL_TEST_URL not set (dedicated disposable MySQL test endpoint)")
+    evidence_url = os.environ.get("GDGAP_MYSQL_URL")
+    if evidence_url and _mysql_host_port(test_url) == _mysql_host_port(evidence_url):
+        pytest.fail(
+            "GDGAP_MYSQL_TEST_URL resolves to the same server as GDGAP_MYSQL_URL — refusing to run "
+            "live-InnoDB tests against the evidence endpoint; use a disposable server (e.g. a "
+            "throwaway container on another port)"
+        )
+    monkeypatch.setenv("GDGAP_MYSQL_URL", test_url)
+    return test_url
+
 
 ATTACH_SQL = """INSTALL ducklake;
 ATTACH 'ducklake:catalog/gdgap.ducklake' AS lake (DATA_PATH 'data/lake/');

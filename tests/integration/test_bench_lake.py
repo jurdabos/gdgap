@@ -13,7 +13,9 @@ from gdgap import build as build_module
 from gdgap.bench import run as bench_run
 from gdgap.ingest import nhts2017
 
-requires_mysql = pytest.mark.skipif(not os.environ.get("GDGAP_MYSQL_URL"), reason="GDGAP_MYSQL_URL not set")
+requires_mysql = pytest.mark.skipif(
+    not os.environ.get("GDGAP_MYSQL_TEST_URL"), reason="GDGAP_MYSQL_TEST_URL not set (dedicated test endpoint)"
+)
 
 
 def _read_rows(path: Path) -> list[dict]:
@@ -93,8 +95,8 @@ def test_bench_rejects_non_warm_temperature(lake_root):
 
 
 @requires_mysql
-def test_bench_innodb_smoke(lake_root):
-    """Benches the InnoDB foil cell end to end (needs GDGAP_MYSQL_URL and the built mirrors)."""
+def test_bench_innodb_smoke(lake_root, mysql_test_endpoint):
+    """Benches the InnoDB foil cell end to end (needs GDGAP_MYSQL_TEST_URL; builds the mirrors itself)."""
     nhts2017.ingest(root=lake_root)
     build_module.build("blind", root=lake_root)
     build_module.build("aware", root=lake_root)
