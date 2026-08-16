@@ -1,0 +1,122 @@
+---
+title: "Domain-adapted Venus assessment: 2017 National Household Travel Survey (NHTS), public-use files"
+author: "Torda Balázs"
+date: 2026-08-16
+---
+
+## Purpose and instrument
+
+This artefact records the R10 assessment (`docs/requirements.md`): a scored, documentary assessment of dataset quality and trustworthiness. It applies the ten-question Venus score (Chicco, Fabris & Jurman, 2025, *BioData Mining* 18:1, <https://doi.org/10.1186/s13040-024-00412-x>) to the 2017 NHTS public-use files through the domain adaptations declared below. The original instrument was developed and evaluated for biomedical datasets.
+
+Each question contributes a value from 0.00 to 1.00 and the ten questions sum to a 0–10 total. Following the paper and its Supplementary File S2, the score is allocated across the named subitems with their published maximum weights. A zero indicates that the relevant information is absent from the assessed documentation; partial documentation receives part of the available subscore; the full subscore requires the corresponding aspect to be suitably treated. The assessment is manual and the allocations remain visible so another reviewer can challenge them item by item.
+
+The result measures the coverage and quality of the available documentation against these adapted questions. It does not validate the truth of the data, statistical representativeness for every use, legal compliance, population fit, or ethical adequacy. Those matters require use-specific statistical, legal, and participatory evaluation. R13 addresses a different question: whether the gdgap pipeline preserves its declared equity-critical properties under executable conformance rules.
+
+## Domain adaptation
+
+The following interpretations retain each item's underlying concern while translating biomedical examples to a national household travel survey:
+
+- Q3 "devices" maps to survey instruments and response modes (mail-out recruitment, web/CATI retrieval, and the travel log). "Medical centers" maps to the collection setting and geographic scope: household-based remote collection across the national and add-on samples, with Westat as collector and a USPS CDS-derived address frame. The collection-period element is unchanged.
+- Q5 "patients" maps to survey respondents. Relevant protected or sensitive attributes include age, sex, race, ethnicity, and household income.
+- Q7 "noise" maps cautiously to non-systematic measurement-process variability and recording artefacts, such as self-report heaping or rounding and mode/interviewer variability. Q6 retains systematic or directional sources of inaccuracy, including underreporting, recall, proxy reporting, nonresponse, and imputation. Sampling variance is inferential uncertainty arising from the sample design; it is reported by the survey's replicate weights but receives no Q7 credit.
+
+These mappings make the assessment useful inside this case study. The resulting total is an internal, domain-adapted indicator and is not comparable with Venus scores produced under the original biomedical interpretation.
+
+## Assessment basis
+
+The assessment uses the authoritative upstream documentation and the local registry artefacts, from the position of a dataset consumer (cf. `DATASHEET.md`): the 2017 NHTS Data User Guide (revised April 2019), Codebook v1.2, 2017 NHTS Weighting Report, 2017 NHTS Sample Design, <https://nhts.ornl.gov>, and `DATASHEET.md`, `manifest.json`, and `checksums.txt` in this directory. Local gdgap results are used only where the rationale explicitly names them.
+
+## Traceability
+
+- Dataset: 2017 NHTS public-use files, release v1.2 (four CSVs pinned by SHA-256 in `checksums.txt` and `manifest.json`).
+- Assessor: Torda Balázs (single assessor; see Limitations).
+- Assessment date: 2026-08-16.
+- Evidence-base commit: `793c488` (the repository state against which this uncommitted assessment was prepared).
+
+## Scores
+
+| Item      | Published subitems and maxima                                                                         	| Awarded allocation       	| Score    |
+| ------    | --------------------------------                                                                      	| --------------------     	| ------:  |
+| Q1        | curators 0.30; context 0.30; purpose 0.40                                                             	| 0.30 + 0.30 + 0.40       	| 1.00     |
+| Q2        | consent 0.30; de-identification 0.30; licence and terms 0.40                                          	| 0.15 + 0.25 + 0.10       	| 0.50     |
+| Q3        | devices 0.30; medical centers 0.40; collection period 0.30                                            	| 0.30 + 0.35 + 0.30       	| 0.95     |
+| Q4        | features 0.50; values 0.50                                                                            	| 0.50 + 0.50              	| 1.00     |
+| Q5        | marginal distribution 0.50; joint distribution 0.20; expected distribution 0.20; label provenance 0.10	| 0.50 + 0.05 + 0.05 + 0.10	| 0.70     |
+| Q6        | sources listed 0.70; sources characterised 0.30                                                       	| 0.65 + 0.15              	| 0.80     |
+| Q7        | sources listed 0.70; sources characterised 0.30                                                       	| 0.30 + 0.00              	| 0.30     |
+| Q8        | annotation and labelling 0.50; cleaning 0.50                                                          	| 0.40 + 0.40              	| 0.80     |
+| Q9        | data-centric publication 0.70; peer-reviewed reputable venue 0.30                                     	| 0.40 + 0.00              	| 0.40     |
+| Q10       | official online release 0.40; persistent identifier 0.30; unrestricted access 0.30                    	| 0.40 + 0.00 + 0.30       	| 0.70     |
+| **Total** |                                                                                                       	|                          	| **7.15** |
+
+## Rationale per item
+
+### Q1 — Origin, context, and purpose: 1.00
+
+The documentation identifies the curator (FHWA, with collection by Westat under contract), purpose (a national inventory of daily travel supporting federal reporting, travel-demand modelling, and research), and context (the civilian, non-institutionalized US population; address-based recruitment and retrieval; the eighth NPTS/NHTS wave). All three published subitems receive full credit. Evidence: User Guide chs. 1–2; `DATASHEET.md` Motivation.
+
+### Q2 — Data protection measures and licence: 0.50
+
+**Consent, 0.15/0.30.** Participation was voluntary, the survey passed OMB review under clearance 2125-0545, and recruitment included confidentiality assurances. The public documentation does not reproduce the assurance wording or fully explain consent for secondary use.
+
+**De-identification, 0.25/0.30.** The public-use files contain no names, addresses, or coordinates; geography is coarsened, and the codebook exhibits suppressed or bounded public-use categories. The detailed disclosure-risk assessment and transformation procedure are not published.
+
+**Licence and terms, 0.10/0.40.** The files are downloadable from the official federal portal, which requests acknowledgement of the NHTS source. No explicit dataset licence or terms-of-use instrument was found. Public availability and recommended attribution therefore receive limited credit here; unrestricted access is scored separately under Q10. Evidence: User Guide; Codebook v1.2; `DATASHEET.md` Collection and Distribution; <https://nhts.ornl.gov/downloads>.
+
+### Q3 — Instruments, collection setting, and collection period: 0.95
+
+**Instruments, 0.30/0.30.** Mail-out recruitment, web and CATI retrieval, the mailed travel log, Spanish-language provision, and instrument testing are documented.
+
+**Collection setting, 0.35/0.40.** The collector, address frame, national and add-on sampling structure, household setting, and remote response modes are documented. The small deduction records the imperfect correspondence between a distributed household survey and the original center-based biomedical subitem.
+
+**Collection period, 0.30/0.30.** Collection ran from April 2016 through May 2017, with assigned travel days distributed across the year. Evidence: User Guide ch. 2; Sample Design §§1–2; `DATASHEET.md` Collection.
+
+### Q4 — All variables and their values explained: 1.00
+
+**Features, 0.50/0.50; values, 0.50/0.50.** Codebook v1.2 documents the variables and their values across the four files, including the reserve codes (`-1` appropriate skip, `-7` prefer not to answer, `-8` don't know, and `-9` not ascertained). Merge patterns appear in User Guide ch. 7. Evidence: Codebook v1.2; `DATASHEET.md` Composition.
+
+### Q5 — Protected attributes: 0.70
+
+**Marginal distribution, 0.50/0.50.** The codebook provides frequencies for attributes including age, sex, race, ethnicity, household income, and medical conditions affecting travel; published weighted totals and raking controls add population context.
+
+**Joint distribution, 0.05/0.20.** Relevant joint distributions can be calculated and selected publications report some of them, but the dataset documentation does not systematically summarise relationships between protected attributes and important travel variables. Computability alone earns no further credit.
+
+**Expected distribution, 0.05/0.20.** ACS control totals provide expected marginal benchmarks for weighting. The documentation gives little evidence-based discussion of expected joint patterns between demographic and travel variables.
+
+**Label provenance, 0.10/0.10.** `R_SEX` and `R_SEX_IMP` distinguish reported and completed sex values, and proxy response is documented. Evidence: Codebook v1.2; Weighting Report chs. 3–4; `DATASHEET.md` Composition.
+
+### Q6 — Potential inaccuracy: 0.80
+
+**Sources listed, 0.65/0.70.** The documentation identifies trip underreporting, time and distance rounding, recall error, proxy reporting, unit and item nonresponse, hot-deck imputation of raking variables, and methodology changes that restrict comparison with 2009. The deduction reflects the absence of one consolidated, exhaustive inaccuracy inventory.
+
+**Sources characterised, 0.15/0.30.** Response rates and imputation procedures are documented, and the local sensitivity audit quantifies the influence of completed sex values on the two gdgap measures. Upstream documentation does not quantify the severity of several major sources, especially underreporting and recall error. Evidence: User Guide chs. 3–4; Weighting Report Appendix D; `DATASHEET.md` Composition and Preprocessing; `results/sensitivity/nhts2017/`.
+
+### Q7 — Measurement-process variability and recording artefacts: 0.30
+
+**Sources listed, 0.30/0.70.** The documentation notes self-report rounding or heaping and differences associated with web and CATI response modes. These are plausible survey analogues for unintentionally recorded variability, although the mapping is less direct than the biomedical signal-noise concept.
+
+**Sources characterised, 0.00/0.30.** Their magnitudes are not characterised. The 98 jackknife replicate weights support variance estimation for the complex sample; sampling variance is analytically distinct from measurement noise and contributes no score here. Evidence: User Guide chs. 2–6; `DATASHEET.md` Composition.
+
+### Q8 — Data preparation: 0.80
+
+**Annotation and labelling, 0.40/0.50; cleaning, 0.40/0.50.** The documentation describes consistency editing, coding of open responses, derived variables, disclosure coarsening, weighting and raking, and within-cell random hot-deck imputation. The editing and weighting code, raw pre-edit microdata, and imputation donor assignments are unavailable, limiting independent reconstruction of the preparation process. Evidence: User Guide chs. 5–6; Weighting Report; `DATASHEET.md` Preprocessing.
+
+### Q9 — Data-centric, peer-reviewed publication: 0.40
+
+**Data-centric publication, 0.40/0.70.** The User Guide, Weighting Report, Sample Design, codebook, and release notes form substantial, versioned agency and contractor documentation centred on the dataset. They provide durable documentation, although they are grey literature rather than a journal data article.
+
+**Peer-reviewed reputable venue, 0.00/0.30.** No canonical peer-reviewed publication describing the 2017 NHTS dataset was identified. Publications that use NHTS do not satisfy this subitem. Evidence: `DATASHEET.md` Uses and the official NHTS documentation catalogue.
+
+### Q10 — Online availability and global identifier: 0.70
+
+**Official online release, 0.40/0.40; unrestricted access, 0.30/0.30.** The files are downloadable without registration from the official federal portal, with versioned releases and release notes.
+
+**Persistent identifier, 0.00/0.30.** No DOI or other persistent global identifier is assigned to the dataset. A stable portal URL and local SHA-256 values aid discovery and integrity but do not substitute for a global persistent identifier. Evidence: `DATASHEET.md` Distribution and Maintenance; `manifest.json`; <https://nhts.ornl.gov/downloads>.
+
+## Limitations
+
+- This is a single-assessor judgement. Chicco et al. used two independent annotators and measured agreement. A second assessor should score the published subitems independently before reconciliation; the present allocations remain visible to make disagreement specific and reviewable.
+- The instrument was developed for biomedical datasets. Q3 and Q7 require the declared survey-domain interpretations, and the resulting total supports no comparison with published biomedical Venus scores.
+- The most judgement-sensitive allocations are Q2, Q5, Q7, and Q9. Their rationales distinguish missing evidence from an imperfect domain mapping.
+- The score evaluates the upstream public-use dataset and its documentation. It does not establish accuracy, representativeness, legal compliance, population fit, or ethical adequacy.
+- Preservation through the gdgap warehouse builds is evaluated separately by R13 (`DATA_QUALITY_SPEC.json` and `results/quality/nhts2017/conformance.csv`).

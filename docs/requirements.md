@@ -81,7 +81,7 @@ Corpus streams: disaggregation mandates (SAGER — Heidari et al., 2016; UN Wome
 - Requirement: Each registered dataset is assessed against the ten Venus items and the assessment is recorded in the dataset registry, so the case description's quality claims are auditable rather than rhetorical.
 - Sources: Chicco et al. (2025).
 - Design hook: assessment artefact alongside the datasheet in `datasets/<ds>/`.
-- Evidence: recorded assessment; §6.1 audit.
+- Evidence: `datasets/nhts2017/VENUS_ASSESSMENT.qmd` (recorded assessment); §6.1 audit.
 
 ## R11 — Findings report benefits and costs symmetrically, reproducibly
 

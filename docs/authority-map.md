@@ -5,17 +5,17 @@ For every kind of knowledge in this project, exactly one source is authoritative
 ## Bibliographic metadata
 
 - Authoritative: cloud-synced Zotero library.
-- Derived: the exports in the thesis workspace (`lit/THESIS.bib`, `lit/THESIS.json` CSL export, `lit/dbengines.bib`) and the Word bibliography inside the thesis document — all regenerated from Zotero, never patched by hand.
+- Derived: exports in the thesis workspace (e.g. `THESIS.json` CSL export) and the Word bibliography inside the thesis document — all regenerated from Zotero, never patched by hand.
 
 ## Claims
 
-- Evidence: original papers, standards (e.g. ISO/IEC 5218, the Stats NZ gender standard), and dataset documentation (FHWA NHTS 2017 codebook, User Guide, Weighting Report).
-- Discovery routes only: search engines, Elicit, Research Rabbit — they locate sources and are never themselves citable authorities.
+- Evidence: original papers, standards (e.g. ISO/IEC 5218, Stats NZ gender standard), and dataset documentation (FHWA NHTS 2017 codebook, User Guide, Weighting Report).
+- Discovery routes only: search engines, Elicit, Research Rabbit.
 
 ## Decisions
 
-- Trail: dated working notes in the thesis workspace (scribble notes, subreads, supervision notes) preserve ideation and screening.
-- Authority: a decision binds only once it lands in `docs/requirements.md` or `docs/adr/`; notes are provenance for how a decision was reached, not authority for what was decided.
+- Trail: dated working notes in a separate thesis workspace (scribble notes, subreads, supervision notes) to preserve ideation and screening.
+- Authority: a decision binds only once it lands in `docs/requirements.md` or `docs/adr/`; notes are provenance for how a decision was reached.
 
 ## Intent
 
@@ -25,11 +25,11 @@ For every kind of knowledge in this project, exactly one source is authoritative
 ## Behaviour
 
 - Authoritative: versioned code (`src/gdgap/`), schemas and query catalogue (`sql/ddl/`, `sql/bench/`), and tests (`tests/`), pinned by `uv.lock`/`.python-version` and checked in CI.
-- Secondary: README and other prose explain behaviour but do not override it; when repo prose and code disagree, code wins and the prose is corrected.
+- Secondary: README and other prose explain behaviour but do not override it; when repo prose and code disagree, code wins, and the prose is corrected.
 
 ## Data semantics
 
-- Authoritative: the source documentation (FHWA codebook) for what the data means at origin, plus the versioned gdgap metadata for what the artefact commits to — `datasets/nhts2017/manifest.json`, `checksums.txt`, `DATASHEET.md`, and the executable `DATA_QUALITY_SPEC.json` (R13).
+- Authoritative: the source documentation (FHWA codebook) for what the data means at origin, plus versioned gdgap metadata for what the artefact commits to — `datasets/nhts2017/manifest.json`, `checksums.txt`, `DATASHEET.md`, and the executable `DATA_QUALITY_SPEC.json` (R13).
 - Rule: semantic commitments live in versioned, preferably executable form; the R13 rules turn drift into a named conformance failure instead of a silent reinterpretation.
 
 ## Results

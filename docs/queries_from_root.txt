@@ -1,13 +1,16 @@
 # Interactive
 duckdb -readonly catalog/gdgap.ducklake
+
 # Then get the relevant snapshot_id
 SELECT max(snapshot_id) AS latest_snapshot_id FROM ducklake_snapshot;
+
 # And now we can list the schemas using the snapshot_id BIGINT (update it in the example below)
 SELECT schema_id, schema_name
 FROM ducklake_schema
 WHERE
     18 >= begin_snapshot AND
     (18 < end_snapshot OR end_snapshot IS NULL);
+
 # And now we can list all the tables in a schema using the schema_id BIGINT
 SELECT table_id, table_name
 FROM ducklake_table
@@ -15,6 +18,7 @@ WHERE
     schema_id = 1 AND
     18 >= begin_snapshot AND
     (18 < end_snapshot OR end_snapshot IS NULL);
+
 # For each given table, we can list the available top-level columns using the ducklake_column table:
 SELECT column_id, column_name, column_type
 FROM ducklake_column
@@ -24,6 +28,7 @@ WHERE
     18 >= begin_snapshot AND
     (18 < end_snapshot OR end_snapshot IS NULL)
 ORDER BY column_order;
+
 # Now list the available top-level columns from table with given id containing the string 'SEX':
 
 # Now that we know the table structure we can query actual data from the Parquet files that store table data by joining data files with delete
