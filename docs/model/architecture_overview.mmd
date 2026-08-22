@@ -1,0 +1,121 @@
+---
+title: "gdgap architecture and data flow"
+---
+%% Stripped-down companion of docs/model/architecture.mmd for in-text use (thesis body,
+%% slides): headwords only, larger type, same topology and visual grammar — the complete,
+%% annotated figure remains the appendix version. Edit both when the pipeline changes.
+%% Render pin: @mermaid-js/mermaid-cli (mmdc) 11.12.0 —
+%% mmdc -i docs/model/architecture_overview.mmd -o docs/model/architecture_overview.png -b white -s 4
+%%{init: {"theme": "neutral", "themeCSS": ".cluster-label div { max-width: none !important; }", "themeVariables": {"fontSize": "20px"}, "flowchart": {"htmlLabels": true, "subGraphTitleMargin": {"top": 10, "bottom": 10}, "nodeSpacing": 35, "rankSpacing": 70, "wrappingWidth": 300}}}%%
+flowchart TB
+    subgraph REG["Dataset registry"]
+        MAN["manifest.json + checksums.txt"]
+        SPEC["DATA_QUALITY_SPEC.json"]
+        MAN ~~~ SPEC
+    end
+
+    subgraph RAW["Raw NHTS 2017 CSVs"]
+        HH["hhpub.csv"]
+        PP["perpub.csv"]
+        TP["trippub.csv"]
+        VP["vehpub.csv"]
+        HH ~~~ TP
+        PP ~~~ VP
+    end
+    VP ~~~ MAN
+
+    VER["Manifest verification"]
+    ING["gdgap ingest"]
+
+    MAN --> VER
+    HH --> VER
+    PP --> VER
+    TP --> VER
+    VP --> VER
+    VER --> ING
+
+    subgraph LAKE["DuckLake"]
+        CATG["catalog/gdgap.ducklake"]
+        subgraph STG["lake.nhts2017 — staged source"]
+            ST["hhpub · perpub · trippub · vehpub"]
+        end
+        subgraph BLD["lake.blind"]
+            BF["fact_person · fact_trip"]
+            BV["v_measures"]
+            BF --> BV
+        end
+        subgraph AWD["lake.aware"]
+            AF["fact_person · fact_trip"]
+            AF ~~~ DSC
+            subgraph AWX["aware-only structures"]
+                DSC["dim_sex_code"]
+                DGI["dim_gender_identity_code"]
+                MAPN["map_nhts_sex"]
+                DPS["dim_person_sex"]
+                EQV["equity views"]
+                DSC ~~~ DGI
+                DGI ~~~ MAPN
+                DSC --> DPS
+                DGI --> DPS
+                MAPN --> DPS
+                DPS --> EQV
+            end
+            AF --> EQV
+        end
+    end
+
+    ING --> ST
+    ST -->|"build blind"| BF
+    ST -->|"build aware"| AF
+
+    VALD["gdgap validate — R13"]
+    SPEC --> VALD
+    ING --> VALD
+    EQV --> VALD
+
+    CAT["Frozen query catalogue"]
+    BEN["gdgap bench"]
+    CAT --> BEN
+    BF --> BEN
+    EQV --> BEN
+
+    subgraph EVID["Evidence — results/"]
+        CONF["conformance.csv"]
+        RUNS["runs.csv · summary.csv · storage.csv"]
+        PLANS["plans/*.json"]
+    end
+    VALD --> CONF
+    BEN --> RUNS
+    BEN --> PLANS
+
+    ENG["DuckDB — query engine"]
+    PQ["Parquet — data files"]
+    ENG --> CATG
+    CATG --> PQ
+
+    subgraph FOIL["MySQL/InnoDB foil"]
+        MYS["MySQL 8.4.11"]
+        MIR["gdgap_blind · gdgap_aware"]
+        MYS -.- MIR
+    end
+    BV ~~~ MYS
+    BF -.-> MIR
+    AF -.-> MIR
+    MIR -.-> BEN
+    MIR -.-> VALD
+
+    classDef process fill:#ffffff,stroke:#333333,stroke-width:1.5px
+    classDef store fill:#f2f2f2,stroke:#333333,stroke-width:1px
+    classDef registry fill:#ffffff,stroke:#333333,stroke-width:1px
+    classDef evidence fill:#ffffff,stroke:#333333,stroke-width:1px
+    classDef layer fill:#e8e8e8,stroke:#333333,stroke-width:1px
+    classDef foil fill:#ffffff,stroke:#666666,stroke-dasharray:6 4
+
+    class VER,ING,VALD,BEN process
+    class ST,BF,BV,AF,DSC,DGI,MAPN,DPS,EQV store
+    class MAN,SPEC,CAT,HH,PP,TP,VP registry
+    class CONF,RUNS,PLANS evidence
+    class ENG,PQ,CATG layer
+    class MYS,MIR foil
+    style FOIL stroke:#666666,stroke-dasharray:6 4
+    style LAKE fill:#fafafa,stroke:#333333,stroke-width:1.5px

@@ -1,5 +1,7 @@
 # gdgap
 
+gdgap is a reference architecture pitting aware-vs-blind pipelines against each other
+with the goal of informing a BSc thesis in the subfield of ethical considerations in data science.
 The canonical DuckDB/DuckLake engine runs in-process, as embedded engines are designed to;
 only the client–server comparison component (MySQL/InnoDB) is containerised. Reproducibility
 comes from version pins, manifest-verified data, and the executable R13 contract rather than

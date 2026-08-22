@@ -1,0 +1,31 @@
+---
+title: "Conceptual and logical model of the aware gdgap variant"
+---
+%% In-text figure for thesis §4.2.1: entities, grains, governing domains, principal
+%% relationships, and the validity/provenance role only — deliberately no attribute blocks,
+%% large type for print-size readability. The complete attribute-level model stays in
+%% docs/model/conceptual.mmd (appendix, full-page landscape); the principal physical columns
+%% and keys moved to docs/model/physical-columns.md (§4.2.2). The blind variant holds the same
+%% facts and omits the entire joinable sex/gender path (the measured R2 contrast).
+%% Render pin: @mermaid-js/mermaid-cli (mmdc) 11.12.0 —
+%% mmdc -i docs/model/conceptual_overview.mmd -o docs/model/conceptual_overview.png -b white -s 4
+%%{init: {"theme": "neutral", "themeVariables": {"fontSize": "22px"}, "er": {"fontSize": 22, "minEntityWidth": 260, "minEntityHeight": 64, "entityPadding": 24}}}%%
+erDiagram
+    HOUSEHOLD["HOUSEHOLD (household grain)"]
+    PERSON["PERSON (person grain)"]
+    VEHICLE["VEHICLE (staged only)"]
+    TRIP["TRIP (trip grain)"]
+    SEX_CODE["SEX_CODE (governed sex domain)"]
+    GENDER_IDENTITY_CODE["GENDER_IDENTITY_CODE (governed gender-identity domain)"]
+    NHTS_SEX_MAP["NHTS_SEX_MAP (reserve-code mapping)"]
+    PERSON_SEX["PERSON_SEX (validity intervals + provenance)"]
+
+    HOUSEHOLD ||--|{ PERSON : comprises
+    HOUSEHOLD ||--o{ VEHICLE : owns
+    PERSON ||--o{ TRIP : makes
+    VEHICLE |o..o{ TRIP : carries
+    PERSON ||--|{ PERSON_SEX : "has recorded"
+    SEX_CODE ||--o{ PERSON_SEX : "classifies (analysis value)"
+    SEX_CODE ||--o{ PERSON_SEX : "classifies (as reported)"
+    GENDER_IDENTITY_CODE ||--o{ PERSON_SEX : "classifies (gender identity)"
+    SEX_CODE ||--o{ NHTS_SEX_MAP : standardises

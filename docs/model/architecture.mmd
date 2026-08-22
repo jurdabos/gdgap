@@ -1,0 +1,123 @@
+---
+title: "gdgap architecture and data flow — canonical DuckDB/DuckLake pipeline with the InnoDB foil as a dashed comparison branch"
+---
+%% Authored architecture/data-flow figure (thesis §4.2): raw NHTS 2017 CSVs to evidence outputs.
+%% Canonical path: manifest verification (R5) → type-governed ingest (R7) → the one shared staged
+%% source lake.nhts2017 (ADR-0002) → fork into the blind and aware builds (src/gdgap/build.py,
+%% sql/ddl/<variant>/) → frozen bench catalogue and evidence (ADR-0004). The R13 executable
+%% data-quality contract (ADR-0009, src/gdgap/quality.py) runs alongside ingest and every aware
+%% build. Layers are distinct: DuckDB is the in-process engine (ADR-0001/0010), DuckLake the table
+%% format + catalog, Parquet the data files. The MySQL/InnoDB foil (ADR-0008) is drawn dashed —
+%% a comparison branch, deliberately not part of the canonical architecture.
+%% Companion figure: docs/model/conceptual.mmd holds the entity-level model; this figure holds the
+%% pipeline and physical layering.
+%% Render pin: @mermaid-js/mermaid-cli (mmdc) 11.12.0 —
+%% mmdc -i docs/model/architecture.mmd -o docs/model/architecture.png -b white -s 4
+%%{init: {"theme": "neutral", "themeCSS": ".cluster-label div { max-width: none !important; }", "flowchart": {"htmlLabels": true, "subGraphTitleMargin": {"top": 10, "bottom": 19}, "nodeSpacing": 69, "rankSpacing": 69}}}%%
+flowchart TB
+    subgraph REG["Dataset registry — datasets/nhts2017/"]
+        MAN["manifest.json + checksums.txt<br/>source URL · per-file SHA-256 · byte sizes (R5)"]
+        SPEC["DATA_QUALITY_SPEC.json<br/>executable DQ-SYN/SEM/PRAG rules, stable IDs (R13)"]
+    end
+
+    subgraph RAW["Raw inputs — data/raw/nhts2017/"]
+        HH["hhpub.csv<br/>households"]
+        PP["perpub.csv<br/>persons"]
+        TP["trippub.csv<br/>trips"]
+        VP["vehpub.csv<br/>vehicles"]
+    end
+
+    VER["Manifest verification<br/>streaming SHA-256 per file — ingest aborts on any mismatch (R5)"]
+    ING["gdgap ingest nhts2017 — type-governed ingest<br/>read_csv with declared types: R_SEX/R_SEX_IMP pinned VARCHAR,<br/>zero-padding and reserve codes -7/-8/-9 survive verbatim (R7)"]
+
+    MAN -->|"expected digests"| VER
+    HH --> VER
+    PP --> VER
+    TP --> VER
+    VP --> VER
+    VER --> ING
+
+    subgraph LAKE["DuckLake — table format + catalog"]
+        CATG["catalog/gdgap.ducklake — DuckLake catalog<br/>snapshots · schemas · data-file tracking — lake.snapshots() audit trail"]
+        subgraph STG["lake.nhts2017 — shared staged source"]
+            ST["hhpub · perpub · trippub · vehpub<br/>one DuckLake snapshot per CREATE<br/>vehpub stays staged-only, never warehoused"]
+        end
+        subgraph BLD["lake.blind — gender-blind build"]
+            BN["deliberate contrast: violates R1–R3, R6–R8 · R13-exempt"]
+            BF["fact_person · fact_trip<br/>no sex attribute anywhere"]
+            BV["v_measures — totals only<br/>q_eq family not representable (R2 contrast)"]
+            BF --> BV
+        end
+        subgraph AWD["lake.aware — gender-aware build"]
+            AF["fact_person · fact_trip<br/>identical fact grain to blind"]
+            subgraph AWX["aware-only structures"]
+                DSC["dim_sex_code<br/>ISO/IEC 5218 core + governed extension U (R1, R6)"]
+                DGI["dim_gender_identity_code<br/>Stats NZ core + extensions U, NC (R1, R6)"]
+                MAPN["map_nhts_sex<br/>raw R_SEX/R_SEX_IMP incl. -7/-8/-9 reserves to governed codes (R7)"]
+                DPS["dim_person_sex<br/>Type-2-style validity intervals · sex_source provenance ·<br/>r_sex_raw verbatim · gender_identity_code = NC by construction (R2, R3, R8)"]
+                EQV["equity views — v_equity_measures<br/>imputation share · care-trip share by sex · PPR<br/>n ≥ 30 small-cell suppression (R9)"]
+                DSC --> DPS
+                DGI --> DPS
+                MAPN --> DPS
+                DPS --> EQV
+            end
+            AF --> EQV
+        end
+    end
+
+    ING -->|"CREATE TABLE per file"| ST
+    ST -->|"gdgap build --variant blind<br/>R-gated DDL, filename order"| BF
+    ST -->|"gdgap build --variant aware<br/>R-gated DDL, filename order"| AF
+
+    VALD["gdgap validate nhts2017 — R13 executable data-quality contract (ADR-0009)<br/>rule-level conformance · error severity fails the run · warnings stay logged"]
+    SPEC -->|"declared rules"| VALD
+    ING -->|"stage: ingest (automatic)"| VALD
+    EQV -->|"stage: aware_build<br/>(automatic, per backend)"| VALD
+
+    CAT["sql/bench/ — frozen query catalogue (ADR-0004)<br/>q_agn_01 care-trip share total · q_agn_02 mode share (variant-agnostic)<br/>q_eq_01 care-trip share by sex · q_eq_02 PPR (equity)<br/>backend-neutral bodies via schema placeholder"]
+    BEN["gdgap bench — one warm cell per invocation<br/>N ≥ 5 seed-shuffled repetitions · medians/IQR · plan capture · result hashes (R11)"]
+    CAT --> BEN
+    BF -->|"q_agn timed · q_eq recorded not_representable"| BEN
+    AF -->|"q_agn timed — values must match blind"| BEN
+    EQV -->|"q_eq timed — suppression inside the measured schema"| BEN
+
+    subgraph EVID["Evidence outputs — results/ (append-only, keyed by commit + snapshot)"]
+        CONF["quality/nhts2017/conformance.csv<br/>run id · snapshot · commit · stage · backend · rule · R-ID · pass/fail"]
+        RUNS["bench/runs.csv · summary.csv · storage.csv · envinfo.json"]
+        PLANS["plans/*.json — tagged formats:<br/>duckdb-profile-json vs mysql-explain-json"]
+    end
+    VALD --> CONF
+    BEN --> RUNS
+    BEN --> PLANS
+
+    ENG["DuckDB v1.5.4 — in-process query engine (ADR-0001, ADR-0010)<br/>ingest · build · validate · bench all execute through it"]
+    PQ["Parquet — immutable data files under data/lake/<br/>DuckLake's only data format"]
+    ENG -->|"ATTACH ducklake:catalog/gdgap.ducklake AS lake"| CATG
+    CATG -->|"tracks active Parquet data files per snapshot"| PQ
+
+    subgraph FOIL["MySQL/InnoDB foil — comparison only"]
+        MYS["MySQL 8.4.11 — compose-managed container<br/>published host-loopback :3307 → container :3306<br/>datadir in volume gdgap_mysql_data (ext4)"]
+        MIR["gdgap_blind · gdgap_aware — row-store mirrors<br/>mirrored DDL (sql/ddl/*/innodb/) + batched table copy from the lake"]
+        MYS -.- MIR
+    end
+    BF -.->|"gdgap build --variant blind<br/>--backend innodb"| MIR
+    AF -..->|"gdgap build --variant aware<br/>--backend innodb"| MIR
+    MIR -.->|"same frozen catalogue — schema placeholder resolves to gdgap_blind/gdgap_aware"| BEN
+    MIR -..->|"aware mirror re-validated —<br/>the lake-to-MySQL migration<br/>is a quality-risk point"| VALD
+
+    classDef process fill:#ffffff,stroke:#333333,stroke-width:1.5px
+    classDef store fill:#f2f2f2,stroke:#333333,stroke-width:1px
+    classDef registry fill:#ffffff,stroke:#333333,stroke-width:1px
+    classDef evidence fill:#ffffff,stroke:#333333,stroke-width:1px
+    classDef layer fill:#e8e8e8,stroke:#333333,stroke-width:1px
+    classDef foil fill:#ffffff,stroke:#666666,stroke-dasharray:6 4
+
+    class VER,ING,VALD,BEN process
+    class ST,BF,BV,AF,DSC,DGI,MAPN,DPS,EQV store
+    class BN registry
+    class MAN,SPEC,CAT,HH,PP,TP,VP registry
+    class CONF,RUNS,PLANS evidence
+    class ENG,PQ,CATG layer
+    class MYS,MIR foil
+    style FOIL stroke:#666666,stroke-dasharray:6 4
+    style LAKE fill:#fafafa,stroke:#333333,stroke-width:1.5px
