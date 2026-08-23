@@ -1,0 +1,53 @@
+{
+  "query_block": {
+    "select_id": 1,
+    "cost_info": {
+      "query_cost": "1021036.85"
+    },
+    "ordering_operation": {
+      "using_filesort": false,
+      "windowing": {
+        "windows": [
+          {
+            "name": "<unnamed window>",
+            "using_temporary_table": true,
+            "frame_buffer": {
+              "using_temporary_table": true,
+              "optimized_frame_evaluation": true
+            },
+            "functions": [
+              "sum"
+            ]
+          }
+        ],
+        "grouping_operation": {
+          "using_temporary_table": true,
+          "using_filesort": true,
+          "cost_info": {
+            "sort_cost": "927201.00"
+          },
+          "table": {
+            "table_name": "fact_trip",
+            "access_type": "ALL",
+            "rows_examined_per_scan": 927201,
+            "rows_produced_per_join": 927201,
+            "filtered": "100.00",
+            "cost_info": {
+              "read_cost": "1115.75",
+              "eval_cost": "92720.10",
+              "prefix_cost": "93835.85",
+              "data_read_per_join": "127M"
+            },
+            "used_columns": [
+              "houseid",
+              "personid",
+              "tdtrpnum",
+              "trptrans",
+              "wttrdfin"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

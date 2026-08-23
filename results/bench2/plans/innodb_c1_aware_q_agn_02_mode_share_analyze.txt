@@ -1,0 +1,8 @@
+-> Sort: gdgap_aware.fact_trip.trptrans  (actual time=370..370 rows=24 loops=1)
+    -> Table scan on <temporary>  (cost=2.5..2.5 rows=0) (actual time=370..370 rows=24 loops=1)
+        -> Temporary table  (cost=0..0 rows=0) (actual time=370..370 rows=24 loops=1)
+            -> Window aggregate with buffering: sum(```sum(gdgap_aware.fact_trip.wttrdfin)```) OVER ()   (actual time=370..370 rows=24 loops=1)
+                -> Table scan on <temporary>  (actual time=370..370 rows=24 loops=1)
+                    -> Aggregate using temporary table  (actual time=370..370 rows=24 loops=1)
+                        -> Table scan on fact_trip  (cost=94113 rows=927201) (actual time=0.72..217 rows=923572 loops=1)
+

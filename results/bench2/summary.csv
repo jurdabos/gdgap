@@ -1,0 +1,17 @@
+run_id,git_commit,backend,condition,workload,query_id,n_blocks,n_reps_per_variant,blind_median_ms,aware_median_ms,delta_mean_ms,delta_t95_low_ms,delta_t95_high_ms,delta_boot95_low_ms,delta_boot95_high_ms,delta_rel_pct,hash_stable,blind_phys_reads_median,aware_phys_reads_median,blind_made_young_median,aware_made_young_median,bootstrap_seed
+20260823T120843Z-bench2-innodb-c1,7e544c2628a6871dac20f183914d30f1f2845a16,innodb,c1,agn,q_agn_01_care_trip_share_total,4,40,161.167,163.061,1.538,-2.867,5.943,-0.447,4.139,0.95,True,0.0,0.0,0.0,0.0,870830257
+20260823T120843Z-bench2-innodb-c1,7e544c2628a6871dac20f183914d30f1f2845a16,innodb,c1,agn,q_agn_02_mode_share,4,40,233.878,234.589,2.135,-4.759,9.029,-1.216,5.934,0.91,True,0.0,0.0,0.0,0.0,870830257
+20260823T120843Z-bench2-innodb-c1,7e544c2628a6871dac20f183914d30f1f2845a16,innodb,c1,eq,q_eq_01_care_trip_share_by_sex,4,40,,658.564,,,,,,,True,,0.0,,558.0,870830257
+20260823T120843Z-bench2-innodb-c1,7e544c2628a6871dac20f183914d30f1f2845a16,innodb,c1,eq,q_eq_02_ppr,4,40,,557.978,,,,,,,True,,0.0,,5145.0,870830257
+20260823T122139Z-bench2-innodb-c2,7e544c2628a6871dac20f183914d30f1f2845a16,innodb,c2,agn,q_agn_01_care_trip_share_total,4,40,152.588,150.463,-1.874,-10.568,6.819,-6.394,2.646,-1.23,True,0.0,0.0,0.0,0.0,509423192
+20260823T122139Z-bench2-innodb-c2,7e544c2628a6871dac20f183914d30f1f2845a16,innodb,c2,agn,q_agn_02_mode_share,4,40,223.157,220.291,-6.109,-18.766,6.548,-13.181,0.122,-2.74,True,0.0,0.0,0.0,0.0,509423192
+20260823T122139Z-bench2-innodb-c2,7e544c2628a6871dac20f183914d30f1f2845a16,innodb,c2,eq,q_eq_01_care_trip_share_by_sex,4,40,,651.945,,,,,,,True,,0.0,,0.0,509423192
+20260823T122139Z-bench2-innodb-c2,7e544c2628a6871dac20f183914d30f1f2845a16,innodb,c2,eq,q_eq_02_ppr,4,40,,548.329,,,,,,,True,,0.0,,0.0,509423192
+20260823T122552Z-bench2-innodb-c3,7e544c2628a6871dac20f183914d30f1f2845a16,innodb,c3,agn,q_agn_01_care_trip_share_total,4,40,148.531,150.627,1.556,-0.803,3.916,0.119,2.644,1.05,True,0.0,0.0,0.0,0.0,2980017865
+20260823T122552Z-bench2-innodb-c3,7e544c2628a6871dac20f183914d30f1f2845a16,innodb,c3,agn,q_agn_02_mode_share,4,40,217.935,218.043,-0.646,-3.772,2.480,-2.306,1.014,-0.30,True,0.0,0.0,0.0,0.0,2980017865
+20260823T122552Z-bench2-innodb-c3,7e544c2628a6871dac20f183914d30f1f2845a16,innodb,c3,eq,q_eq_01_care_trip_share_by_sex,4,40,,621.775,,,,,,,True,,0.0,,0.0,2980017865
+20260823T122552Z-bench2-innodb-c3,7e544c2628a6871dac20f183914d30f1f2845a16,innodb,c3,eq,q_eq_02_ppr,4,40,,523.885,,,,,,,True,,0.0,,0.0,2980017865
+20260823T122901Z-bench2-ducklake-d0,7e544c2628a6871dac20f183914d30f1f2845a16,ducklake,d0,agn,q_agn_01_care_trip_share_total,4,40,4.840,4.854,0.020,-0.540,0.580,-0.255,0.295,0.42,True,,,,,2038072825
+20260823T122901Z-bench2-ducklake-d0,7e544c2628a6871dac20f183914d30f1f2845a16,ducklake,d0,agn,q_agn_02_mode_share,4,40,4.439,4.439,-0.019,-0.241,0.204,-0.115,0.110,-0.42,True,,,,,2038072825
+20260823T122901Z-bench2-ducklake-d0,7e544c2628a6871dac20f183914d30f1f2845a16,ducklake,d0,eq,q_eq_01_care_trip_share_by_sex,4,40,,30.954,,,,,,,True,,,,,2038072825
+20260823T122901Z-bench2-ducklake-d0,7e544c2628a6871dac20f183914d30f1f2845a16,ducklake,d0,eq,q_eq_02_ppr,4,40,,34.084,,,,,,,True,,,,,2038072825

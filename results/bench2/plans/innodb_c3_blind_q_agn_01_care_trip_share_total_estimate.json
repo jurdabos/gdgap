@@ -1,0 +1,26 @@
+{
+  "query_block": {
+    "select_id": 1,
+    "cost_info": {
+      "query_cost": "88375.39"
+    },
+    "table": {
+      "table_name": "fact_trip",
+      "access_type": "ALL",
+      "rows_examined_per_scan": 870655,
+      "rows_produced_per_join": 870655,
+      "filtered": "100.00",
+      "cost_info": {
+        "read_cost": "1309.89",
+        "eval_cost": "87065.50",
+        "prefix_cost": "88375.39",
+        "data_read_per_join": "119M"
+      },
+      "used_columns": [
+        "whyto",
+        "whyfrom",
+        "wttrdfin"
+      ]
+    }
+  }
+}

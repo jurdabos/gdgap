@@ -1,0 +1,471 @@
+{
+    "total_bytes_written": 0,
+    "total_bytes_read": 4956,
+    "system_peak_temp_dir_size": 0,
+    "system_peak_buffer_memory": 151000038,
+    "rows_returned": 2,
+    "wal_replay_entry_count": 0,
+    "result_set_size": 112,
+    "query_name": "-- R2, R9, R11: equity benchmark query (Q_eq) — participation representation ratio by sex from the\n-- deployed aware view (suppression n >= 30 inside the view, R9). Not representable on the blind\n-- schema: recorded as a capability state, never executed there.\nSELECT\n    sex_code,\n    care_share,\n    population_share,\n    ppr,\n    persons_n,\n    care_trips_n\nFROM lake.aware.v_ppr\nORDER BY sex_code;\n",
+    "waiting_to_attach_latency": 0.0,
+    "attach_load_storage_latency": 0.0,
+    "blocked_thread_time": 0.0,
+    "cpu_time": 0.10716517699999999,
+    "extra_info": {},
+    "total_memory_allocated": 39845888,
+    "cumulative_cardinality": 2666652,
+    "checkpoint_latency": 0.0,
+    "cumulative_rows_scanned": 6865096,
+    "write_to_wal_latency": 0.0,
+    "latency": 0.048447296,
+    "attach_replay_wal_latency": 0.0,
+    "commit_local_storage_latency": 0.0,
+    "children": [
+        {
+            "system_peak_temp_dir_size": 0,
+            "system_peak_buffer_memory": 0,
+            "result_set_size": 112,
+            "operator_timing": 0.000041697000000000004,
+            "operator_type": "ORDER_BY",
+            "cpu_time": 0.10716147499999999,
+            "extra_info": {
+                "Order By": "lake.aware.v_ppr.sex_code ASC"
+            },
+            "cumulative_cardinality": 2666652,
+            "cumulative_rows_scanned": 6865096,
+            "operator_cardinality": 2,
+            "operator_name": "ORDER_BY",
+            "operator_rows_scanned": 0,
+            "children": [
+                {
+                    "system_peak_temp_dir_size": 0,
+                    "system_peak_buffer_memory": 0,
+                    "result_set_size": 112,
+                    "operator_timing": 0.000003214,
+                    "operator_type": "PROJECTION",
+                    "cpu_time": 0.107119778,
+                    "extra_info": {
+                        "Projections": [
+                            "sex_code",
+                            "care_share",
+                            "population_share",
+                            "ppr",
+                            "persons_n",
+                            "care_trips_n"
+                        ],
+                        "Estimated Cardinality": "262"
+                    },
+                    "cumulative_cardinality": 2666650,
+                    "cumulative_rows_scanned": 6865096,
+                    "operator_cardinality": 2,
+                    "operator_name": "PROJECTION",
+                    "operator_rows_scanned": 0,
+                    "children": [
+                        {
+                            "system_peak_temp_dir_size": 0,
+                            "system_peak_buffer_memory": 0,
+                            "result_set_size": 160,
+                            "operator_timing": 3.73e-7,
+                            "operator_type": "PROJECTION",
+                            "cpu_time": 0.107116564,
+                            "extra_info": {
+                                "Projections": [
+                                    "#0",
+                                    "#1",
+                                    "#2",
+                                    "#3",
+                                    "#4",
+                                    "#5",
+                                    "#6",
+                                    "#5",
+                                    "#6"
+                                ],
+                                "Estimated Cardinality": "262"
+                            },
+                            "cumulative_cardinality": 2666648,
+                            "cumulative_rows_scanned": 6865096,
+                            "operator_cardinality": 2,
+                            "operator_name": "PROJECTION",
+                            "operator_rows_scanned": 0,
+                            "children": [
+                                {
+                                    "system_peak_temp_dir_size": 0,
+                                    "system_peak_buffer_memory": 0,
+                                    "result_set_size": 128,
+                                    "operator_timing": 0.000036649,
+                                    "operator_type": "WINDOW",
+                                    "cpu_time": 0.107116191,
+                                    "extra_info": {
+                                        "Projections": [
+                                            "sum(care_weight) OVER ()",
+                                            "sum(person_weight) OVER ()"
+                                        ]
+                                    },
+                                    "cumulative_cardinality": 2666646,
+                                    "cumulative_rows_scanned": 6865096,
+                                    "operator_cardinality": 2,
+                                    "operator_name": "WINDOW",
+                                    "operator_rows_scanned": 0,
+                                    "children": [
+                                        {
+                                            "system_peak_temp_dir_size": 0,
+                                            "system_peak_buffer_memory": 0,
+                                            "result_set_size": 96,
+                                            "operator_timing": 0.00006186600000000001,
+                                            "operator_type": "HASH_JOIN",
+                                            "cpu_time": 0.107079542,
+                                            "extra_info": {
+                                                "Join Type": "INNER",
+                                                "Conditions": "sex_code = sex_code",
+                                                "Estimated Cardinality": "262"
+                                            },
+                                            "cumulative_cardinality": 2666644,
+                                            "cumulative_rows_scanned": 6865096,
+                                            "operator_cardinality": 2,
+                                            "operator_name": "HASH_JOIN",
+                                            "operator_rows_scanned": 0,
+                                            "children": [
+                                                {
+                                                    "system_peak_temp_dir_size": 0,
+                                                    "system_peak_buffer_memory": 0,
+                                                    "result_set_size": 64,
+                                                    "operator_timing": 0.000004535,
+                                                    "operator_type": "FILTER",
+                                                    "cpu_time": 0.056409341,
+                                                    "extra_info": {
+                                                        "Expression": "(person_n >= 30)",
+                                                        "Estimated Cardinality": "9579"
+                                                    },
+                                                    "cumulative_cardinality": 1056940,
+                                                    "cumulative_rows_scanned": 2113872,
+                                                    "operator_cardinality": 2,
+                                                    "operator_name": "FILTER",
+                                                    "operator_rows_scanned": 0,
+                                                    "children": [
+                                                        {
+                                                            "system_peak_temp_dir_size": 0,
+                                                            "system_peak_buffer_memory": 0,
+                                                            "result_set_size": 64,
+                                                            "operator_timing": 0.0066688400000000005,
+                                                            "operator_type": "HASH_GROUP_BY",
+                                                            "cpu_time": 0.056404806,
+                                                            "extra_info": {
+                                                                "Groups": "#0",
+                                                                "Aggregates": [
+                                                                    "sum(#1)",
+                                                                    "count_star()"
+                                                                ],
+                                                                "Estimated Cardinality": "47896"
+                                                            },
+                                                            "cumulative_cardinality": 1056938,
+                                                            "cumulative_rows_scanned": 2113872,
+                                                            "operator_cardinality": 2,
+                                                            "operator_name": "HASH_GROUP_BY",
+                                                            "operator_rows_scanned": 0,
+                                                            "children": [
+                                                                {
+                                                                    "system_peak_temp_dir_size": 0,
+                                                                    "system_peak_buffer_memory": 0,
+                                                                    "result_set_size": 6341616,
+                                                                    "operator_timing": 0.000021948,
+                                                                    "operator_type": "PROJECTION",
+                                                                    "cpu_time": 0.049735966,
+                                                                    "extra_info": {
+                                                                        "Projections": [
+                                                                            "sex_code",
+                                                                            "wtperfin"
+                                                                        ],
+                                                                        "Estimated Cardinality": "52846"
+                                                                    },
+                                                                    "cumulative_cardinality": 1056936,
+                                                                    "cumulative_rows_scanned": 2113872,
+                                                                    "operator_cardinality": 264234,
+                                                                    "operator_name": "PROJECTION",
+                                                                    "operator_rows_scanned": 0,
+                                                                    "children": [
+                                                                        {
+                                                                            "system_peak_temp_dir_size": 0,
+                                                                            "system_peak_buffer_memory": 0,
+                                                                            "result_set_size": 6341616,
+                                                                            "operator_timing": 0.026974678,
+                                                                            "operator_type": "HASH_JOIN",
+                                                                            "cpu_time": 0.049714018,
+                                                                            "extra_info": {
+                                                                                "Join Type": "INNER",
+                                                                                "Conditions": [
+                                                                                    "houseid = houseid",
+                                                                                    "personid = personid"
+                                                                                ],
+                                                                                "Estimated Cardinality": "52846"
+                                                                            },
+                                                                            "cumulative_cardinality": 792702,
+                                                                            "cumulative_rows_scanned": 2113872,
+                                                                            "operator_cardinality": 264234,
+                                                                            "operator_name": "HASH_JOIN",
+                                                                            "operator_rows_scanned": 0,
+                                                                            "children": [
+                                                                                {
+                                                                                    "system_peak_temp_dir_size": 0,
+                                                                                    "system_peak_buffer_memory": 0,
+                                                                                    "result_set_size": 8455488,
+                                                                                    "operator_timing": 0.019725633,
+                                                                                    "operator_type": "TABLE_SCAN",
+                                                                                    "cpu_time": 0.019725633,
+                                                                                    "extra_info": {
+                                                                                        "Table": "fact_person",
+                                                                                        "Projections": [
+                                                                                            "houseid",
+                                                                                            "personid",
+                                                                                            "wtperfin"
+                                                                                        ],
+                                                                                        "Estimated Cardinality": "264234",
+                                                                                        "Dynamic Filters": [
+                                                                                            "optional: houseid>=30000007 AND optional: houseid<=50515573",
+                                                                                            "optional: personid>='01' AND optional: personid<='13'"
+                                                                                        ],
+                                                                                        "Total Files Read": "1",
+                                                                                        "Inlined Tables Read": "1",
+                                                                                        "Filename(s)": "data/lake/aware/fact_person/ducklake-019fcd3a-71aa-7651-9d17-07687c2585d2.parquet"
+                                                                                    },
+                                                                                    "cumulative_cardinality": 264234,
+                                                                                    "cumulative_rows_scanned": 1056936,
+                                                                                    "operator_cardinality": 264234,
+                                                                                    "operator_name": "DUCKLAKE_SCAN",
+                                                                                    "operator_rows_scanned": 1056936,
+                                                                                    "children": []
+                                                                                },
+                                                                                {
+                                                                                    "system_peak_temp_dir_size": 0,
+                                                                                    "system_peak_buffer_memory": 0,
+                                                                                    "result_set_size": 10569360,
+                                                                                    "operator_timing": 0.0030137070000000013,
+                                                                                    "operator_type": "TABLE_SCAN",
+                                                                                    "cpu_time": 0.0030137070000000013,
+                                                                                    "extra_info": {
+                                                                                        "Table": "dim_person_sex",
+                                                                                        "Projections": [
+                                                                                            "houseid",
+                                                                                            "personid",
+                                                                                            "sex_code"
+                                                                                        ],
+                                                                                        "Filters": "is_current",
+                                                                                        "Estimated Cardinality": "52846",
+                                                                                        "Total Files Read": "1",
+                                                                                        "Inlined Tables Read": "1",
+                                                                                        "Filename(s)": "data/lake/aware/dim_person_sex/ducklake-019fcd3a-7146-7012-918a-98dadf03f8f0.parquet"
+                                                                                    },
+                                                                                    "cumulative_cardinality": 264234,
+                                                                                    "cumulative_rows_scanned": 1056936,
+                                                                                    "operator_cardinality": 264234,
+                                                                                    "operator_name": "DUCKLAKE_SCAN",
+                                                                                    "operator_rows_scanned": 1056936,
+                                                                                    "children": []
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "system_peak_temp_dir_size": 0,
+                                                    "system_peak_buffer_memory": 0,
+                                                    "result_set_size": 64,
+                                                    "operator_timing": 0.000012533,
+                                                    "operator_type": "FILTER",
+                                                    "cpu_time": 0.050608335,
+                                                    "extra_info": {
+                                                        "Expression": "(care_n >= 30)",
+                                                        "Estimated Cardinality": "7242"
+                                                    },
+                                                    "cumulative_cardinality": 1609702,
+                                                    "cumulative_rows_scanned": 4751224,
+                                                    "operator_cardinality": 2,
+                                                    "operator_name": "FILTER",
+                                                    "operator_rows_scanned": 0,
+                                                    "children": [
+                                                        {
+                                                            "system_peak_temp_dir_size": 0,
+                                                            "system_peak_buffer_memory": 0,
+                                                            "result_set_size": 64,
+                                                            "operator_timing": 0.0033355109999999998,
+                                                            "operator_type": "HASH_GROUP_BY",
+                                                            "cpu_time": 0.050595801999999995,
+                                                            "extra_info": {
+                                                                "Groups": "#0",
+                                                                "Aggregates": [
+                                                                    "sum(#1)",
+                                                                    "count_star()"
+                                                                ],
+                                                                "Estimated Cardinality": "36212"
+                                                            },
+                                                            "cumulative_cardinality": 1609700,
+                                                            "cumulative_rows_scanned": 4751224,
+                                                            "operator_cardinality": 2,
+                                                            "operator_name": "HASH_GROUP_BY",
+                                                            "operator_rows_scanned": 0,
+                                                            "children": [
+                                                                {
+                                                                    "system_peak_temp_dir_size": 0,
+                                                                    "system_peak_buffer_memory": 0,
+                                                                    "result_set_size": 2531352,
+                                                                    "operator_timing": 0.00004838900000000001,
+                                                                    "operator_type": "PROJECTION",
+                                                                    "cpu_time": 0.047260290999999996,
+                                                                    "extra_info": {
+                                                                        "Projections": [
+                                                                            "sex_code",
+                                                                            "wttrdfin"
+                                                                        ],
+                                                                        "Estimated Cardinality": "36942"
+                                                                    },
+                                                                    "cumulative_cardinality": 1609698,
+                                                                    "cumulative_rows_scanned": 4751224,
+                                                                    "operator_cardinality": 105473,
+                                                                    "operator_name": "PROJECTION",
+                                                                    "operator_rows_scanned": 0,
+                                                                    "children": [
+                                                                        {
+                                                                            "system_peak_temp_dir_size": 0,
+                                                                            "system_peak_buffer_memory": 0,
+                                                                            "result_set_size": 2531352,
+                                                                            "operator_timing": 0.022132305999999997,
+                                                                            "operator_type": "HASH_JOIN",
+                                                                            "cpu_time": 0.04721190199999999,
+                                                                            "extra_info": {
+                                                                                "Join Type": "INNER",
+                                                                                "Conditions": [
+                                                                                    "houseid = houseid",
+                                                                                    "personid = personid"
+                                                                                ],
+                                                                                "Estimated Cardinality": "36942"
+                                                                            },
+                                                                            "cumulative_cardinality": 1504225,
+                                                                            "cumulative_rows_scanned": 4751224,
+                                                                            "operator_cardinality": 105473,
+                                                                            "operator_name": "HASH_JOIN",
+                                                                            "operator_rows_scanned": 0,
+                                                                            "children": [
+                                                                                {
+                                                                                    "system_peak_temp_dir_size": 0,
+                                                                                    "system_peak_buffer_memory": 0,
+                                                                                    "result_set_size": 3375136,
+                                                                                    "operator_timing": 0.00006691600000000001,
+                                                                                    "operator_type": "PROJECTION",
+                                                                                    "cpu_time": 0.022008925999999998,
+                                                                                    "extra_info": {
+                                                                                        "Projections": [
+                                                                                            "#0",
+                                                                                            "#1",
+                                                                                            "#4"
+                                                                                        ],
+                                                                                        "Estimated Cardinality": "184714"
+                                                                                    },
+                                                                                    "cumulative_cardinality": 1134518,
+                                                                                    "cumulative_rows_scanned": 3694288,
+                                                                                    "operator_cardinality": 105473,
+                                                                                    "operator_name": "PROJECTION",
+                                                                                    "operator_rows_scanned": 0,
+                                                                                    "children": [
+                                                                                        {
+                                                                                            "system_peak_temp_dir_size": 0,
+                                                                                            "system_peak_buffer_memory": 0,
+                                                                                            "result_set_size": 6750272,
+                                                                                            "operator_timing": 0.004790843,
+                                                                                            "operator_type": "FILTER",
+                                                                                            "cpu_time": 0.021942009999999998,
+                                                                                            "extra_info": {
+                                                                                                "Expression": "((whyto = '06') OR (whyfrom = '06'))",
+                                                                                                "Estimated Cardinality": "184714"
+                                                                                            },
+                                                                                            "cumulative_cardinality": 1029045,
+                                                                                            "cumulative_rows_scanned": 3694288,
+                                                                                            "operator_cardinality": 105473,
+                                                                                            "operator_name": "FILTER",
+                                                                                            "operator_rows_scanned": 0,
+                                                                                            "children": [
+                                                                                                {
+                                                                                                    "system_peak_temp_dir_size": 0,
+                                                                                                    "system_peak_buffer_memory": 0,
+                                                                                                    "result_set_size": 59108608,
+                                                                                                    "operator_timing": 0.017151167,
+                                                                                                    "operator_type": "TABLE_SCAN",
+                                                                                                    "cpu_time": 0.017151167,
+                                                                                                    "extra_info": {
+                                                                                                        "Table": "fact_trip",
+                                                                                                        "Projections": [
+                                                                                                            "houseid",
+                                                                                                            "personid",
+                                                                                                            "whyto",
+                                                                                                            "whyfrom",
+                                                                                                            "wttrdfin"
+                                                                                                        ],
+                                                                                                        "Estimated Cardinality": "923572",
+                                                                                                        "Dynamic Filters": [
+                                                                                                            "optional: houseid>=30000007 AND optional: houseid<=50515573",
+                                                                                                            "optional: personid>='01' AND optional: personid<='13'"
+                                                                                                        ],
+                                                                                                        "Total Files Read": "1",
+                                                                                                        "Inlined Tables Read": "1",
+                                                                                                        "Filename(s)": "data/lake/aware/fact_trip/ducklake-019fcd3a-71f6-7821-bc97-f93af04b0d8e.parquet"
+                                                                                                    },
+                                                                                                    "cumulative_cardinality": 923572,
+                                                                                                    "cumulative_rows_scanned": 3694288,
+                                                                                                    "operator_cardinality": 923572,
+                                                                                                    "operator_name": "DUCKLAKE_SCAN",
+                                                                                                    "operator_rows_scanned": 3694288,
+                                                                                                    "children": []
+                                                                                                }
+                                                                                            ]
+                                                                                        }
+                                                                                    ]
+                                                                                },
+                                                                                {
+                                                                                    "system_peak_temp_dir_size": 0,
+                                                                                    "system_peak_buffer_memory": 0,
+                                                                                    "result_set_size": 10569360,
+                                                                                    "operator_timing": 0.0030706699999999993,
+                                                                                    "operator_type": "TABLE_SCAN",
+                                                                                    "cpu_time": 0.0030706699999999993,
+                                                                                    "extra_info": {
+                                                                                        "Table": "dim_person_sex",
+                                                                                        "Projections": [
+                                                                                            "houseid",
+                                                                                            "personid",
+                                                                                            "sex_code"
+                                                                                        ],
+                                                                                        "Filters": "is_current",
+                                                                                        "Estimated Cardinality": "52846",
+                                                                                        "Total Files Read": "1",
+                                                                                        "Inlined Tables Read": "1",
+                                                                                        "Filename(s)": "data/lake/aware/dim_person_sex/ducklake-019fcd3a-7146-7012-918a-98dadf03f8f0.parquet"
+                                                                                    },
+                                                                                    "cumulative_cardinality": 264234,
+                                                                                    "cumulative_rows_scanned": 1056936,
+                                                                                    "operator_cardinality": 264234,
+                                                                                    "operator_name": "DUCKLAKE_SCAN",
+                                                                                    "operator_rows_scanned": 1056936,
+                                                                                    "children": []
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

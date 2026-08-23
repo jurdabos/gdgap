@@ -1,0 +1,11 @@
+-> Sort: gdgap_aware.v_care_trip_share_by_sex.sex_code  (cost=2.6..2.6 rows=0) (actual time=838..838 rows=2 loops=1)
+    -> Table scan on v_care_trip_share_by_sex  (cost=2.5..2.5 rows=0) (actual time=838..838 rows=2 loops=1)
+        -> Materialize  (cost=0..0 rows=0) (actual time=838..838 rows=2 loops=1)
+            -> Filter: (`count(0)` >= 30)  (actual time=838..838 rows=2 loops=1)
+                -> Table scan on <temporary>  (actual time=838..838 rows=2 loops=1)
+                    -> Aggregate using temporary table  (actual time=838..838 rows=2 loops=1)
+                        -> Nested loop inner join  (cost=186921 rows=992560) (actual time=1.59..620 rows=923572 loops=1)
+                            -> Filter: (0 <> d.is_current)  (cost=27521 rows=238953) (actual time=1.57..171 rows=264234 loops=1)
+                                -> Table scan on d  (cost=27521 rows=265503) (actual time=1.57..159 rows=264234 loops=1)
+                            -> Index lookup on f using PRIMARY (houseid=d.houseid, personid=d.personid)  (cost=0.252 rows=4.15) (actual time=0.00115..0.00151 rows=3.5 loops=264234)
+

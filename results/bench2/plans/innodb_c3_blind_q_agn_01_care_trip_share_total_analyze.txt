@@ -1,0 +1,3 @@
+-> Aggregate: sum(gdgap_blind.fact_trip.wttrdfin), sum((case when ((gdgap_blind.fact_trip.whyto = '06') or (gdgap_blind.fact_trip.whyfrom = '06')) then gdgap_blind.fact_trip.wttrdfin else 0 end)), sum((case when ((gdgap_blind.fact_trip.whyto = '06') or (gdgap_blind.fact_trip.whyfrom = '06')) then gdgap_blind.fact_trip.wttrdfin else 0 end)), sum(gdgap_blind.fact_trip.wttrdfin)  (cost=175441 rows=1) (actual time=322..322 rows=1 loops=1)
+    -> Table scan on fact_trip  (cost=88375 rows=870655) (actual time=0.393..223 rows=923572 loops=1)
+
