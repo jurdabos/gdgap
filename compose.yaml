@@ -8,6 +8,10 @@ services:
     container_name: gdgap-mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${GDGAP_MYSQL_ROOT_PASSWORD:?set GDGAP_MYSQL_ROOT_PASSWORD in .env}
+    # Bench2 condition knob (ADR-0011): the default preserves the 128 MB v1 pool byte-for-byte;
+    # set GDGAP_MYSQL_BUFFER_POOL=1073741824 and recreate the container for the non-constraining c2 cell
+    command:
+      - --innodb-buffer-pool-size=${GDGAP_MYSQL_BUFFER_POOL:-134217728}
     ports:
       # Binding 3307 to stay clear of any Windows-side MySQL that localhost forwarding might expose on 3306
       - "127.0.0.1:3307:3306"

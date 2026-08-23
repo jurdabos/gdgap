@@ -127,6 +127,68 @@ def bench_cmd(
     )
 
 
+@cli.command("bench2")
+@click.option(
+    "--backend",
+    type=click.Choice(["ducklake", "innodb"]),
+    default="ducklake",
+    show_default=True,
+    help="Execution backend (innodb is the row-oriented foil)",
+)
+@click.option(
+    "--condition",
+    type=click.Choice(["d0", "c1", "c2", "c3"]),
+    default=None,
+    help="ADR-0011 condition (default: d0 for ducklake, c1 for innodb); c2 needs the compose pool knob",
+)
+@click.option(
+    "--workload",
+    type=click.Choice(["agn", "eq", "both"]),
+    default="both",
+    show_default=True,
+    help="W_agn runs on both variants; W_eq is aware-only (ADR-0011)",
+)
+@click.option("--blocks", type=click.IntRange(min=1), default=4, show_default=True, help="Counterbalanced blocks")
+@click.option(
+    "--reps",
+    type=click.IntRange(min=1),
+    default=5,
+    show_default=True,
+    help="Recorded repetitions per segment (2 segments per variant per block)",
+)
+@click.option("--bootstrap-seed", type=int, default=None, help="Bootstrap seed (generated and persisted when omitted)")
+@click.option("--allow-small", is_flag=True, help="Skip the full-scale guard (fixture-scale test runs only)")
+@click.option("--summarize-only", is_flag=True, help="Only regenerate results/bench2/summary.csv from retained rows")
+def bench2_cmd(
+    backend: str,
+    condition: str | None,
+    workload: str,
+    blocks: int,
+    reps: int,
+    bootstrap_seed: int | None,
+    allow_small: bool,
+    summarize_only: bool,
+) -> None:
+    """Runs the ADR-0011 mechanism-probe protocol (bench v2) for one backend/condition cell."""
+    # Importing lazily so push invocations skip the duckdb import
+    from gdgap.bench.run2 import regenerate_summary2, run_bench2
+    from gdgap.ingest.nhts2017 import find_root
+
+    if summarize_only:
+        path = regenerate_summary2(find_root())
+        click.echo(f"✓ Summary regenerated at {path}")
+        return
+    run_bench2(
+        backend_name=backend,
+        condition=condition,
+        workload=workload,
+        blocks=blocks,
+        reps=reps,
+        bootstrap_seed=bootstrap_seed,
+        allow_small=allow_small,
+    )
+
+
 @cli.command("validate")
 @click.argument("dataset", default="nhts2017", required=False)
 @click.option(
