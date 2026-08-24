@@ -1,0 +1,120 @@
+---
+format:
+  pdf:
+    include-in-header:
+      text: |
+        \usepackage{fvextra}
+        \fvset{breaklines=true,breakanywhere=true}
+        \ifdefined\Highlighting
+          \RecustomVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\},breaklines=true,breakanywhere=true}
+        \fi
+---
+
+Four forensic observations from the frozen evidence:
+
+1. The slowdown is additive, not multiplicative. Blind−aware deltas: q_agn_01 394.1−145.2 = 248.9 ms, q_agn_02 451.8−200.9 = 251.0 ms. Two queries with very different CPU baselines (145 vs 201 ms) paid the same fixed ~250 ms surcharge. That's the signature of a constant physical-read bill per fact_trip scan, not of per-row cost differences (collation, types, or CPU-frequency effects would scale ~proportionally).
+2. Both cells sat in stable regimes. Blind is flat at 390–414 ms across all 5 reps (no warming trend), aware flat at 143–148 ms. Blind's IQRs are also 4–5× wider — consistent with I/O in the loop.
+3. The optimizer priced the two scans differently. MySQL 8's cost model prices pages by buffer-pool residency (memory_block_read_cost 0.25 vs io_block_read_cost 1.0). Aware fact_trip = 73,121,792 B = exactly 4463 pages, and its read_cost is 1115.75 = 4463 × 0.25 — priced as 100% pool-resident. Blind's 1418.31 (vs 1115.0 fully-resident) implies ~9% priced as disk I/O even immediately after blind's own warm-up scan. The frozen plans literally encode the residency asymmetry.
+4. The configuration makes residency fragile. envinfo.json records innodb_buffer_pool_size = 134217728 — the 128 MB MySQL default — against 88 MB (blind) + 106 MB (aware) of data on the same server. And ~250 ms for a 73 MB re-read ≈ 290 MB/s, a plausible O_DIRECT rate through the WSL2 VHD path (MySQL 8.4 defaults to O_DIRECT, so no OS page cache safety net).
+
+The mechanism that ties this together is InnoDB's scan-resistant LRU. Full-scan pages enter the old sublist (37% of pool ≈ 47 MB — smaller than the 73 MB table), and are only promoted to the young sublist if re-touched more than innodb_old_blocks_time (default 1000 ms) after first access. Now the cruel arithmetic:
+
+•  Blind cell: only the two q_agn queries are runnable (q_eq is not_representable by design), so one round ≈ 394+452 ≈ 0.85 s < 1 s. Every page's re-touch came inside the promotion window → nothing was ever promoted → 73 MB cycled through a ~47 MB strict-LRU window → essentially every page missed on every scan, forever. A stable thrash state — matching the flat reps and the "high average residency yet slow" paradox in (3).
+•  Aware cell: four queries per round ≈ 1.5 s > 1 s (and its warm-up phase, with two ~0.6 s q_eq executions plus EXPLAINs, already spaced re-touches past the threshold) → pages got promoted, and the young sublist (~63% ≈ 80 MB) fits the 73 MB table → memory-speed scans from repetition 1.
+
+The irony: awareness didn't speed up the q_agn scans — the co-scheduled q_eq queries did, by stretching the round past the LRU promotion threshold. The blind variant's deliberate capability limitation plausibly caused its own cache pathology. A precondition is that the pool was already full when the blind cell started (otherwise 73 MB would simply fit); the most likely filler is the aware build/load, which runs last in the ("blind", "aware") build order, leaving aware pages resident — which also independently favored the aware cell.
+
+Let's investigate.
+```bash
+uv run python - <<'PY'
+from pathlib import Path
+from time import perf_counter, sleep
+from gdgap.bench.backends.innodb import InnodbBackend
+b = InnodbBackend(Path.cwd())
+def rows(sql):
+    return b.fetchall(sql)
+def status():
+    s = dict(rows("show global status like 'Innodb_buffer_pool_read%'"))
+    p = rows(
+        "select free_buffers, database_pages, old_database_pages, pages_made_young, pages_not_made_young "
+        "from information_schema.innodb_buffer_pool_stats"
+    )[0]
+    return {k: int(v) for k, v in s.items()} | dict(
+        zip(("free_buffers", "db_pages", "old_pages", "made_young", "not_made_young"), map(int, p))
+    )
+def scan(label, sql, prev):
+    t0 = perf_counter()
+    rows(sql)
+    ms = (perf_counter() - t0) * 1e3
+    cur = status()
+    d = {k: cur[k] - prev[k] for k in cur}
+    print(
+        f"{label:<28} {ms:8.1f} ms | phys_reads {d['Innodb_buffer_pool_reads']:>6} "
+        f"read_ahead {d['Innodb_buffer_pool_read_ahead']:>6} req {d['Innodb_buffer_pool_read_requests']:>8} | "
+        f"made_young {d['made_young']:>6} not_young {d['not_made_young']:>7} free {cur['free_buffers']:>5}"
+    )
+    return cur
+print("== schemata collations ==")
+for r in rows(
+    "select schema_name, default_character_set_name, default_collation_name "
+    "from information_schema.schemata where schema_name like 'gdgap%' order by schema_name"
+):
+    print(" ", r)
+print("== table collations ==")
+for r in rows(
+    "select table_schema, table_name, table_collation, row_format from information_schema.tables "
+    "where table_schema in ('gdgap_blind','gdgap_aware') and table_type='BASE TABLE' order by 1,2"
+):
+    print(" ", r)
+print("== column charsets (fact_trip varchar cols) ==")
+for r in rows(
+    "select table_schema, column_name, character_set_name, collation_name from information_schema.columns "
+    "where table_name='fact_trip' and table_schema like 'gdgap%' and character_set_name is not null order by 1,2"
+):
+    print(" ", r)
+print("== innodb variables ==")
+for pat in ("innodb_old_blocks%", "innodb_buffer_pool_size", "innodb_flush_method", "innodb_buffer_pool_instances"):
+    for r in rows(f"show global variables like '{pat}'"):
+        print(" ", r)
+Q_BLIND = ("select sum(case when whyto='06' or whyfrom='06' then wttrdfin else 0 end), sum(wttrdfin) "
+           "from gdgap_blind.fact_trip")
+Q_AWARE = Q_BLIND.replace("gdgap_blind", "gdgap_aware")
+print("== counter deltas (diagnostic scans, nothing appended to results/) ==")
+s = status()
+print(f"start: free_buffers {s['free_buffers']}, db_pages {s['db_pages']}, old_pages {s['old_pages']}")
+s = scan("fill: aware fact_trip", Q_AWARE, s)
+s = scan("fill: aware fact_person", "select count(*) from gdgap_aware.fact_person", s)
+s = scan("fill: aware dim_person_sex", "select count(*) from gdgap_aware.dim_person_sex", s)
+PYclose()"aware rescan 2 (back-to-back)", Q_AWARE, s)
+```
+```bash
+uv run python - <<'PY'
+from pathlib import Path
+from gdgap.bench.backends.innodb import InnodbBackend
+b = InnodbBackend(Path.cwd())
+for schema in ("gdgap_blind", "gdgap_aware"):
+    for (t,) in b.fetchall(
+        f"select table_name from information_schema.tables where table_schema='{schema}' "
+        "and table_type='BASE TABLE' order by table_name"
+    ):
+        n = b.fetchall(f"select count(*) from {schema}.{t}")[0][0]
+        dl, il, upd = b.fetchall(
+            "select data_length, index_length, update_time from information_schema.tables "
+            f"where table_schema='{schema}' and table_name='{t}'"
+        )[0]
+        print(f"{schema}.{t}: rows={n}, data={dl}, index={il}, update_time={upd}")
+b.close()
+PY
+```
+The three checks ran clean, but they surfaced something more important than what they were designed to test. Results in order:
+Hypothesis confirmed
+LRU variables — mechanism preconditions confirmed exactly. innodb_old_blocks_pct = 37, innodb_old_blocks_time = 1000 ms, innodb_buffer_pool_size = 128 MB (matching the frozen envinfo.json), innodb_flush_method = O_DIRECT, single buffer-pool instance. All the defaults the cyclic-thrash hypothesis assumed.
+
+Counter deltas, however, are not testable, which gives us an interesting finding. The scans returned in 2–7 ms touching ~82 pages because the live InnoDB mirrors no longer hold the benchmark data. Every gdgap_% table now contains 2–5 fixture rows; gdgap_blind tables carry update_time = 2026-08-10 13:26:43 — two days after the freeze run. The cause is visible in the tests: test_bench_innodb_smoke and test_build_innodb_mirrors_lake use tmp fixture roots for the lake and results/ (so your frozen evidence files are untouched), but the InnoDB backend always connects to the shared compose server from .env and the DDL hard-codes gdgap_blind/gdgap_aware with DROP TABLE IF EXISTS. Any pytest run with GDGAP_MYSQL_URL set clobbers the real 918 K-row mirrors with fixture rows. That evidently happened on Aug 10 at 13:26.
+
+Implications:
+•  The buffer-pool residency demonstration cannot be run against the current server state. Reproducing it requires rebuilding both InnoDB mirrors at full scale.
+•  We should point the requires_mysql tests at a dedicated test endpoint, so pytest can never silently destroy the benchmark mirrors again.
+
+Resolution note (2026-08-15): defect fix with tests implemented — live-InnoDB tests now require a dedicated GDGAP_MYSQL_TEST_URL, the mysql_test_endpoint fixture rebinds GDGAP_MYSQL_URL to it for the test's duration, and tests refuse to run when the test URL resolves to the evidence server's host:port (tests/conftest.py; unit-tested in tests/unit/test_mysql_test_guard.py; changelog entry under [Unreleased] → Fixed).
+Resolution note (2026-08-23): mirrors rebuilt, bench 2 suite run – second round of results confirm the buffer-pool/LRU hyppthesis. Order has been counterbalanced across independent blocks, and plans and buffer-pool counters have been retained outside the timed window. The large protocol-v1 InnoDB asymmetry has disappeared under these controls.
