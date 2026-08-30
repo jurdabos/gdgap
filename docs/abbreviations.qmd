@@ -1,0 +1,189 @@
+3NF
+third normal form
+
+9P
+Plan 9 Filesystem Protocol
+
+ABS
+address-based sample
+
+ACS
+American Community Survey
+
+BI
+business intelligence
+
+BPMN
+Business Process Model Notation
+
+CATI
+computer-assisted telephone interviewing
+
+CDC
+change data capture
+
+CDS
+computerized delivery sequence
+
+CEDAW
+Convention on the Elimination of All Forms of Discrimination against Women
+
+CENSUS_R
+census region classification for home address
+
+CTAS
+CREATE TABLE AS SELECT
+parallelized operation of creating a table from the output of a selection
+
+CV
+coefficient of variation
+
+CWG
+cisgender women and girls
+
+DML
+data manipulation language
+
+DRVR
+driver
+
+DSM
+decomposition storage model
+
+DWH
+data warehouse
+
+E2E
+end to end
+
+EHR
+electronic health record
+
+ER
+entity–relationship (model)
+
+ESS(C)
+European Statistical System (Committee)
+
+GDGN
+gender-diverse and gender-nonconforming people
+
+GDO
+gender data outlook
+
+genAI
+generative artificial intelligence
+
+gfm
+GitHub-flavored markdown
+
+HBHUR
+household block group urban/rural (indicator)
+
+HDFS
+Hadoop distributed file system
+
+HHCONF
+household confirmation
+
+HHFAMINC
+household (family) income
+
+HHSIZE
+household size
+count of household members
+
+HHVEHCNT
+count of household vehicles
+
+i.e.
+id est
+that is
+
+IERMB
+Institut d'Estudis Regionals i Metropolitans de Barcelona
+Barcelona Institute of Regional and Metropolitan Studies
+
+JOB
+join order benchmark
+
+LRU
+least recently used
+
+LTS
+long-term support
+
+MDGG
+mobility design gender gap
+
+MGSC
+marginalization due to one’s gender and/or sex characteristics
+
+ML
+machine learning
+
+MMSR
+mixed-methods systematic reviews
+
+MPO
+Metropolitan Planning Organization
+
+NAT
+Network Address Translation
+
+NF
+normal form
+
+NPTS
+Nationwide Personal Transportation Survey
+
+OMB
+Office of Management and Budget
+
+PAX
+partition attributes across
+
+PCC
+population, concept, and context
+
+PK
+primary key
+
+ScR
+scoping review
+
+SE
+standard error
+
+sh -c
+shell command (string in the standard Unix command-line interpreter)
+
+SSBM
+star schema benchmark
+
+TGNB
+transgender people, including nonbinary people
+
+TPC-DS
+Transaction Processing Performance Council – decision support
+
+TPC-H
+Transaction Processing Performance Council – ad hoc
+
+TSE
+total survey error
+
+URBRUR
+household in urban/rural area
+
+US DOT
+United States Department of Transportation
+
+USPS
+United States Postal Service
+
+wc
+word count
+
+WTHHFIN
+final household weight
