@@ -13,6 +13,7 @@ import json
 import click
 from acidbase.cli_utils import group
 from acidbase.push import push_command
+from acidbase.versioning import bump_command
 
 
 @group()
@@ -22,6 +23,7 @@ def cli() -> None:
 
 # The canonical ``push`` workflow lives in :mod:`acidbase.push`; mounting it
 # here keeps gdgap in step with every other consumer repo.
+cli.add_command(bump_command)
 cli.add_command(push_command)
 
 
