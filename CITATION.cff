@@ -1,14 +1,16 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it using the metadata from this file."
+message: "If you use this software, please cite the thesis described in preferred-citation."
 type: software
-title: "gdgap: gender-blind vs. gender-aware data warehousing over the 2017 NHTS"
+title: "gdgap: blind and sex-aware data warehousing over the 2017 NHTS"
 authors:
   - family-names: "Torda"
     given-names: "Balázs"
     email: "balazs.torda@iu-study.org"
 repository-code: "https://github.com/jurdabos/gdgap"
 license: MIT
-version: 0.1.0
+version: 1.0.0
+doi: 10.5281/zenodo.22288496
+date-released: 2026-09-04
 keywords:
   - "gender data gap"
   - "sex-disaggregated data"
@@ -18,8 +20,22 @@ keywords:
   - "DuckLake"
   - "NHTS 2017"
 abstract: >-
-  Design-science artefact contrasting a gender-blind and a gender-aware warehouse
-  variant built from the identical 2017 NHTS source: sex/gender as a first-class,
-  provenance-carrying dimension with validity-interval mutability handling, derived
-  equity measures (care-trip share, PPR) under small-cell suppression, an executable
-  data-quality contract, and a benchmark harness against a containerised InnoDB foil.
+  Design-science software artefact comparing blind and aware data-warehouse variants
+  built from the same 2017 NHTS source data. The aware variant retains recorded sex,
+  source response states and provenance, and governs sex and gender identity as
+  separate domains; it records gender identity as not collected because the source
+  instrument does not elicit it. The artefact also provides an executable data-quality
+  contract, small-cell-suppressed equity measures, an imputation-sensitivity audit,
+  and a bounded warm-query benchmark using a containerised InnoDB foil.
+
+preferred-citation:
+  type: thesis
+  title: "Modelling, scheming, and housing: designing data systems in a quest to bridge the gender data gap"
+  authors:
+    - family-names: "Torda"
+      given-names: "Balázs"
+  institution:
+    name: "IU International University of Applied Sciences"
+  thesis-type: "BSc thesis"
+  year: 2026
+  url: "https://github.com/jurdabos/thesis"

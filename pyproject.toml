@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "gdgap"
-version = "0.1.1"
-description = "A tool related to probe datasets with respect to the gender data gap and build (a) reference architecture(s)"
+version = "1.0.0"
+description = "Design-science data-warehouse artefact comparing blind and sex-aware pipelines over the 2017 NHTS"
 authors = [{ name = "Balázs Torda", email = "balazs.torda@iu-study.org" }]
 license = "MIT"
 readme = "README.md"

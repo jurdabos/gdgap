@@ -31,6 +31,22 @@ ADR-0004 requires protocol changes to arrive as a new ADR with separately identi
   - E5d — InnoDB `c3`: relative to `c1`, the constrained-pool scan penalty attributable to promotion gating disappears (pages young at first touch). If `c1` thrashes and `c3` does not, the scan-resistant-LRU account is established from two independent directions (pool size and promotion window); if `c1` already shows no thrash, the v1 asymmetry is attributed to cross-variant pool state under the v1 co-scheduling, which the v2 design equalises — either way the §5.2 sentence gains a tested grounding.
 - Non-goals: warm protocol only (no cold-cache claim — unchanged from ADR-0004); no cross-engine product table; `W_eq` timings document the aware workload under each condition and support no variant contrast; storage measurement is not repeated (v1's storage.csv remains authoritative).
 
+## Evidence and freeze record
+
+Protocol v2 was implemented at
+`7e544c2628a6871dac20f183914d30f1f2845a16`; every retained v2 run records
+that commit in `results/bench2/runs.csv` and `envinfo.json`. The complete
+evidence was committed at `89256b89420107da1ca865cf81dab3dc1fac9568` on
+2026-08-23.
+
+The repository's initial feature-freeze declaration dates to 2026-08-15.
+ADR-0011 was an authorised, separately governed evidence amendment to that
+freeze. The amendment closed when the evidence landed at `89256b8`, which is
+therefore the final thesis freeze of the measured path. Subsequent
+documentation, citation-metadata and release commits may describe or package
+the evidence, but they do not supersede either evidence stage's recorded code
+and evidence commits.
+
 ## Consequences
 
 - The thesis can cite v1 for the frozen headline numbers and v2 for the mechanism question, each under its own authority note; nothing in `results/bench/`, the v1 harness, or the catalogue changes.

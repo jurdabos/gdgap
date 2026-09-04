@@ -6,7 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.0.0] - 2026-09-04
+
 ### Changed
+
+- Reconciled the release-facing documentation without changing the measured
+  path or retained evidence. The README now defines the blind and aware
+  variants, separates the canonical DuckDB/DuckLake architecture from the
+  optional InnoDB foil, documents the non-benchmark build and check path,
+  provides a manifest-verified download path for the official NHTS archive,
+  distinguishes protocol-v1 and protocol-v2 authority, and states the data,
+  licence, citation and inference boundaries. `CITATION.cff` now matches the
+  release version `1.0.0` and uses the same blind/sex-aware
+  terminology as the package description. ADR-0001 has a dated clarification
+  that its “sole query engine” decision concerns the canonical lake, not the
+  later benchmark foil.
 - `docs/requirements.md`: R2's requirement sentence qualified from an unconditional universal to "Every declared person-linked analysis grain **for which sex is conceptually relevant and available** is computable disaggregated by sex without schema change", with a new scope note and an added source. Rationale (UNDP, UNODC & OHCHR, 2024, SDG 16 global progress report): indicators whose units of analysis are non-person entities (financial flows, businesses, institutions, arms) cannot be sex-disaggregated, and person-centred indicators may recommend disaggregation while data remain unavailable — R2 now claims capability where relevance and availability hold, and exhibits absence (R1 `NC` path, R7 reserve codes) where they do not. Operational content unchanged: the Q_eq-as-plain-SQL test, the DQ rules, and the build gate are untouched; the thesis §2.3 headline bullet is updated to match (the `.docx` is maintained outside this repo).
 - Adopted the canonical non-truncating CLI help from acidbase: the top-level command group is now built with `acidbase.cli_utils.group` (a `click.Group` subclass) instead of `click.group`. Click's default group listing truncates each command's short help at 45 characters, so longer descriptions ended in `...`; the shared group wraps the full first paragraph onto aligned continuation lines instead. `RichGroup.main` also routes output through `ensure_unicode_safe_streams()`, so non-ASCII help (em dashes, accented words) survives on Windows consoles using a legacy code page. `uv.lock` pins acidbase at the commit providing `cli_utils`.
 - Consolidated the CLI onto the ecosystem's canonical push workflow: removed the verbatim copy of acidbase's push machinery (the DVC extension sets, nine private helpers `_get_project_root` / `_get_project_name` / `_has_dvc` / `_run` / `_has_changes` / `_count_unpushed` / `_hooks_modified_files` / `_find_untracked_for_dvc` / `_find_dvc_changed_outs` / `_auto_commit_message`, and the 135-line inline `push` command) in favour of `from acidbase.push import push_command`. The duplicate came from the pre-acidbase scaffolder template this repo was generated from and had already drifted from upstream, missing later fixes such as the clean-but-ahead push guard and dual-publish support. `src/gdgap/cli.py` drops from 529 to 194 lines; the stale template module docstring ("Reusable push CLI") and the placeholder group docstring ("CLI tools.") were replaced with gdgap-specific text. Verified beforehand that nothing outside the push block referenced any removed symbol.
@@ -23,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `datasets/nhts2017/VENUS_ASSESSMENT.qmd`: the R10 Venus assessment artefact — the ten Chicco et al. (2025) questions scored manually (0.00–1.00 each per the paper's convention, total 7.45/10) for the 2017 NHTS public-use files from the authoritative upstream documentation (User Guide, Codebook v1.2, Weighting Report, Sample Design Plan) and the local datasheet, with per-item rationale and evidence pointers, a domain-adaptation note (the biomedical instrument read against a household travel survey: devices → instruments/response modes, noise → rounding/mode effects/sampling variance), a single-assessor limitation note, and commit-pinned traceability. Closes the gap where ADR-0009 and the DATA_QUALITY_SPEC `known_limitations` deferred accuracy, representativeness, ethics, and population fit to "R10's Venus assessment" while the registry held no such artefact (the thesis §6.1 audit had R10 unmet); R10's evidence hook in `docs/requirements.md` now names the artefact. Documentation-plane only — no `src/`, DDL, or harness change.
 
-- Publication instruments due before the repo is cited: `LICENSE` (MIT, 2026 Balázs Torda — a public repo without one is all-rights-reserved by default), `CITATION.cff` (GitHub "Cite this repository"; `version`/`date-released`/DOI/`preferred-citation` get finalized at release), a README `Reproduction` section (prerequisites, non-redistributed NHTS acquisition via the manifest, the full ordered pipeline, where evidence lands), and `pyproject.toml` `authors` + `license = "MIT"` metadata. Release-time steps — version bump, changelog roll-over, tagging the final-evidence commit, GitHub release, optional DOI — stay deliberately deferred to submission.
+- Publication instruments prepared for repository citation: `LICENSE` (MIT, 2026 Balázs Torda — a public repo without one is all-rights-reserved by default), `CITATION.cff` (GitHub "Cite this repository"; version `1.0.0`, release date and reserved Zenodo DOI), a README `Reproduction` section (prerequisites, non-redistributed NHTS acquisition via the manifest, the full ordered pipeline, where evidence lands), and `pyproject.toml` `authors` + `license = "MIT"` metadata.
 
 - `docs/authority-map.md`: the project's authority map — one authoritative source per kind of knowledge (Zotero for bibliographic metadata with `.bib`/CSL/Word bibliographies derived; original papers/standards/dataset docs as claim evidence with search engines/Elicit/Research Rabbit as discovery routes only; dated notes as decision trail with authority binding only in `docs/requirements.md`/`docs/adr/`; versioned code/schemas/tests over prose for behaviour; source codebook plus versioned metadata incl. the R13 spec for data semantics; output-plus-provenance for results; the thesis `.docx` authoritative for the argument only, never over code or source documentation). Correction direction fixed: derivatives are regenerated or corrected toward the authority, never the reverse (worked example: ADR-0010).
 
@@ -95,5 +110,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `pyproject.toml`: added the missing `[build-system]` table (hatchling) so uv packages the project and installs the `gdgap` console script. Modern `uv init` scaffolds an unpackaged app, so uv skipped `[project.scripts]` entry-point installation and `uv run gdgap --help` failed with "Failed to spawn".
 
 ### Notes / clarifications
+
+- Freeze record reconciled: the repository entered its initial feature freeze
+  on 2026-08-15. ADR-0011 subsequently authorised protocol v2 as a separately
+  governed evidence amendment. The v2 runs record code commit
+  `7e544c2628a6871dac20f183914d30f1f2845a16`, and the complete evidence landed
+  at `89256b89420107da1ca865cf81dab3dc1fac9568` on 2026-08-23. That commit marks
+  the final thesis freeze of the measured path. Later documentation,
+  citation-metadata and release commits do not alter the retained v1 or v2
+  evidence or replace their embedded provenance.
 
 - Data file format considered and deferred (dated addendum in `docs/adr/0001-engine-and-lake.md`): Vortex (LF AI & Data incubation, first-class DuckDB extension) and F3 (Zeng et al., 2025; Wasm-embedded decoders, self-declared research prototype) were evaluated as Parquet successors on 2026-08-08. No change: DuckLake writes Parquet only (the experimental Vortex support PR duckdb/ducklake #1193 was closed by the maintainers in May 2026), the claimed wins target scales and access patterns this artefact does not have, and a swap would invalidate stamped evidence without a re-collection protocol (ADR-0010 logic). Revisit if DuckLake gains pluggable data-file formats — the `{schema}`-neutral catalogue and backend seam keep the format below the artefact's interfaces.
