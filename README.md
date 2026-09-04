@@ -55,7 +55,7 @@ curl --fail --location --show-error \
 uv run python -m zipfile -e \
   /tmp/nhts2017-csv.zip data/raw/nhts2017
 rm /tmp/nhts2017-csv.zip
-
+mkdir -p catalog
 uv run gdgap ingest nhts2017
 uv run gdgap profile
 uv run gdgap summarize
