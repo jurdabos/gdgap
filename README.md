@@ -21,16 +21,22 @@ provenance provide the reproducibility chain (ADR-0010).
 
 ## Repository guide
 
-- `docs/requirements.md` defines the R1–R13 requirements.
-- `docs/adr/` records the architectural and evaluation decisions.
+- [`docs/README.md`](docs/README.md) is the documentation index.
+- [`docs/requirements.md`](docs/requirements.md) defines the R1–R13
+  requirements.
+- [`docs/adr/`](docs/adr/) records the architectural and evaluation decisions.
+- [`docs/model/architecture_overview.png`](docs/model/architecture_overview.png)
+  and [`docs/model/conceptual_overview.png`](docs/model/conceptual_overview.png)
+  provide the reader-facing architecture and data-model views; the Mermaid
+  sources and detailed diagrams are retained beside them.
 - `datasets/nhts2017/` contains the source manifest, datasheet and executable
   data-quality specification, but not the source CSV files.
 - `sql/ddl/` and `sql/bench/` contain the warehouse definitions and the frozen
   query catalogue.
 - `results/` contains the retained profile, quality, sensitivity and benchmark
   evidence.
-- `docs/authority-map.md` identifies the authoritative source for each kind of
-  claim, decision, behaviour, data meaning and result.
+- [`docs/authority-map.md`](docs/authority-map.md) identifies the authoritative
+  source for each kind of claim, decision, behaviour, data meaning and result.
 
 ## Install and build the canonical artefact
 

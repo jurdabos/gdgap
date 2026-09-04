@@ -88,7 +88,7 @@ Corpus streams: disaggregation mandates (SAGER — Heidari et al., 2016; UN Wome
 - Requirement: The measurement harness emits effectiveness (Q_eq answerability, signal reproduction) and costs (complexity, storage, exposure) from one command, with the environment captured per run (engine version, image digest, threads, memory), so reporting cannot cherry-pick and any number can be regenerated.
 - Sources: ACM (2018) — 1.3 honesty, 2.5 comprehensive evaluations; Le (2024) — activism needs contestable, credible numbers.
 - Design hook: Phase E bench harness (fixed pragmas, N = 5, medians, envinfo per row).
-- Evidence: `results/bench_summary.csv`, `results/plans/`, `results/storage_by_column.csv`; the §5.1/§5.2 symmetry itself.
+- Evidence: `results/bench/{runs,summary,storage}.csv`, `results/bench/envinfo.json`, `results/plans/`, and the protocol-v2 evidence under `results/bench2/`; the §5.1/§5.2 symmetry itself.
 
 ## R12 — Gender sensitivity is traceable at every lifecycle stage
 
@@ -103,7 +103,3 @@ Corpus streams: disaggregation mandates (SAGER — Heidari et al., 2016; UN Wome
 - Sources: King & Schwarzenbach (2020) — migration/transformation as general quality-risk points and the specification → monitoring/control mechanism; the gender-sensitive rule content is determined by R1, R3, R6, R7, R9, and R12 with their advocacy/standards sources.
 - Design hook (§4.2): `datasets/nhts2017/DATA_QUALITY_SPEC.json` — purpose/syntax/semantics/pragmatics declarations plus executable rules with stable `DQ-*` IDs — run by `gdgap validate nhts2017`, automatically after ingest and after every aware build on either backend (ADR-0009). Loss is operationalised as attribute omission, response-state collapse, sex/gender conflation, provenance loss, grain detachment, or lost disaggregability — not merely corrupted cells; the blind variant stays exempt per the conventions above.
 - Evidence: `results/quality/nhts2017/conformance.csv` (run id, snapshot, commit, stage, backend, rule ID, R-ID, expected, observed, severity, pass/fail, evidence pointer); integration tests cover passing fixtures and intentional failures.
-
-## Parked corpus extensions
-
-Garzcarek & Steuer (2019) and Regulation (EU) 2024/1689 are parked: they may harden R9 (exposure) and R11 (professional duty) if the corresponding thesis paragraphs demand it. Additions append as R14+ per the conventions above.
