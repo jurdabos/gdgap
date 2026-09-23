@@ -1,4 +1,5 @@
 # gdgap
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22288496.svg)](https://doi.org/10.5281/zenodo.22288496)
 
 `gdgap` is a design-science software artefact for examining how choices in
 analytical data-warehouse design make sex-related information available or
@@ -147,7 +148,6 @@ see `LICENSE`. That licence does not relicense the NHTS source data.
 
 ## Citation
 
-The DOI `10.5281/zenodo.22288496` is reserved for the `v1.0.0` release and
-will begin resolving when the Zenodo draft is published.
+The archived v1.0.0 release is available at the DOI `10.5281/zenodo.22288496`.
 
 For the study-level citation, use the thesis metadata under preferred-citation in CITATION.cff or GitHub’s Cite this repository panel. To identify the archived software release, use the top-level software metadata and version DOI 10.5281/zenodo.22288496.
