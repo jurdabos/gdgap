@@ -5,6 +5,7 @@ title: "gdgap: blind and sex-aware data warehousing over the 2017 NHTS"
 authors:
   - family-names: "Torda"
     given-names: "Balázs"
+    orcid: "0009-0007-2925-8979"
     email: "balazs.torda@iu-study.org"
 repository-code: "https://github.com/jurdabos/gdgap"
 license: MIT
