@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- `.github/workflows/lint.yml`: the lint job now fails with a clear annotation when `.python-version` is
+  missing instead of letting a bare `uv python install` pick the newest CPython (3.15 broke bpmfinder via
+  numba); this repo already tracks its 3.13 pin. It also syncs with plain `uv sync --frozen` instead of the
+  always-failing `--extra dev` fallback.
 
 ## [1.0.0] - 2026-09-04
 
