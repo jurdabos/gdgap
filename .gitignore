@@ -130,3 +130,12 @@ catalog/
 !datasets/
 # Results are ch. 4 evidence (profiles, plans, storage metrics) and stay tracked despite the global *.csv ignore
 !results/**/*.csv
+
+# --- appended by acidbase scaffold ---
+*.npy
+.env.*
+.serena/
+.wdm/
+/.quarto/
+/_site/
+!.env.example
