@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
+- `.gitignore`, `.gitleaks.toml`: dropped the blanket `*.sql` ignore, which kept new SQL files out of Git without a word, and added the `sql-password-literal` rule, because the upstream rules miss a password written as a SQL literal.
 - `.github/workflows/lint.yml`: the gitleaks download retries with `--retry 5`, because a transient 504 from GitHub's release host failed `lint` on code that was fine.
 - `.github/workflows/lint.yml`, `.gitleaks.toml`: the gitleaks job checks its download against a pinned SHA-256 and runs `gitleaks git`, because `detect` is deprecated. Docs and changelogs are scanned now; false positives go in `.gitleaksignore`.
 ### Fixed
