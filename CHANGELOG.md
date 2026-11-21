@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+
+- `src/gdgap/cli.py`, `tests/unit/test_cli_clean.py`, `uv.lock`: mounts acidbase's shared `clean` command beside `bump` and `push`. It removes Python development caches: `__pycache__`, stray `*.pyc`, the pytest, Hypothesis, ruff and mypy caches, and coverage output. It never removes anything Git tracks, and leaves virtual environments, `node_modules`, nested repositories and every other ignored file alone. `--dry-run` lists the caches with their sizes first. `uv.lock` moves acidbase to the release that ships it.
+
 ### Changed
 - `.env.example`: says what the keyring setup is, that secrets work from `.env` without one, and which values have to stay in the file, so someone new to the repo needs neither the keyring nor acidbase's tooling.
 - `.gitignore`, `.gitleaks.toml`: dropped the blanket `*.sql` ignore, which kept new SQL files out of Git without a word, and added the `sql-password-literal` rule, because the upstream rules miss a password written as a SQL literal.
