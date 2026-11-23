@@ -22,7 +22,7 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-acidbase = { git = "https://github.com/jurdabos/acidbase.git" }
+acidbase = { git = "https://github.com/jurdabos/acidbase.git", tag = "v0.3.0" }
 
 [project.scripts]
 gdgap = "gdgap.cli:main"
